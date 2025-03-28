@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
 import { Eye, EyeOff } from "lucide-react";
+import { Loader2 } from "lucide-react"; //Import Loader2
+
 
 const ADMIN_PASSWORD = "admin123"; // In a real application, this would be stored securely
 
@@ -88,8 +90,12 @@ const Admin = () => {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button type="submit" className="w-full">
-                  Login
+                <Button type="submit" className="w-full" disabled={!password}>
+                  {isAuthenticated ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    "Login"
+                  )}
                 </Button>
               </CardFooter>
             </form>
