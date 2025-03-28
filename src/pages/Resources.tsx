@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { Search, Calendar, GraduationCap, FileText } from "lucide-react";
 import { useState } from "react";
 
 const sampleResources: ResourceProps[] = [
