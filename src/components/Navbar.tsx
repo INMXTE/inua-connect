@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, GraduationCap } from 'lucide-react';
+import { Menu, X, GraduationCap, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -34,6 +34,10 @@ const Navbar = () => {
             </Link>
             <Link to="/profile" className="text-gray-700 hover:text-primary font-medium">
               My Profile
+            </Link>
+            <Link to="/admin" className="text-gray-700 hover:text-primary font-medium flex items-center">
+              <Settings className="h-4 w-4 mr-1" />
+              Admin
             </Link>
             <Link to="/signup">
               <Button>Sign Up</Button>
@@ -87,6 +91,14 @@ const Navbar = () => {
               onClick={() => setIsMenuOpen(false)}
             >
               My Profile
+            </Link>
+            <Link 
+              to="/admin"
+              className="text-gray-700 hover:text-primary font-medium flex items-center"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Settings className="h-4 w-4 mr-1" />
+              Admin
             </Link>
             <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
               <Button className="w-full">Sign Up</Button>

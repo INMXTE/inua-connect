@@ -23,7 +23,11 @@ const Hero = () => {
               </Button>
             </Link>
             <Link to="/resources">
-              <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-primary">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="bg-transparent text-white hover:bg-white hover:text-primary border-white"
+              >
                 Browse Resources
               </Button>
             </Link>
