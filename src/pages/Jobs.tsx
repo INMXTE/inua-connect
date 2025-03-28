@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -106,7 +105,6 @@ const Jobs = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Already filtered above
   };
 
   return (
@@ -149,7 +147,7 @@ const Jobs = () => {
                     <SelectValue placeholder="All Types" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Types</SelectItem>
+                    <SelectItem value="all-types">All Types</SelectItem>
                     {jobTypes.map((type) => (
                       <SelectItem key={type} value={type}>{type}</SelectItem>
                     ))}
@@ -164,7 +162,7 @@ const Jobs = () => {
                     <SelectValue placeholder="All Locations" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Locations</SelectItem>
+                    <SelectItem value="all-locations">All Locations</SelectItem>
                     {locations.map((loc) => (
                       <SelectItem key={loc} value={loc}>{loc}</SelectItem>
                     ))}
