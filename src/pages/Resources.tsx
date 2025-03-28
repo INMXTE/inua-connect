@@ -6,8 +6,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Search, Calendar, GraduationCap, FileText } from "lucide-react";
+import { Search, Calendar, GraduationCap, FileText, Clock, MapPin, Users } from "lucide-react";
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { 
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 const sampleResources: ResourceProps[] = [
   {
@@ -75,6 +81,7 @@ const sampleResources: ResourceProps[] = [
 const Resources = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  const [isRegistering, setIsRegistering] = useState(false);
 
   const filteredResources = sampleResources.filter(resource => {
     const matchesSearch = 
@@ -90,6 +97,12 @@ const Resources = () => {
     
     return matchesSearch && matchesTab;
   });
+
+  // Count resources by type for badges
+  const workshopsCount = sampleResources.filter(r => r.type === "Workshop").length;
+  const mentorshipCount = sampleResources.filter(r => r.type === "Mentorship").length;
+  const cvCount = sampleResources.filter(r => r.type === "CV Assistance").length;
+  const articlesCount = sampleResources.filter(r => r.type === "Article").length;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -121,6 +134,22 @@ const Resources = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
+              {searchTerm && (
+                <div className="mt-2 flex items-center">
+                  <span className="text-sm text-gray-500 mr-2">
+                    Showing results for: 
+                  </span>
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    {searchTerm}
+                    <button 
+                      className="ml-1 hover:text-primary"
+                      onClick={() => setSearchTerm("")}
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                </div>
+              )}
             </div>
             
             <Tabs 
@@ -130,12 +159,37 @@ const Resources = () => {
               onValueChange={setActiveTab}
             >
               <div className="flex justify-center mb-6">
-                <TabsList>
-                  <TabsTrigger value="all">All Resources</TabsTrigger>
-                  <TabsTrigger value="workshops">Workshops</TabsTrigger>
-                  <TabsTrigger value="mentorship">Mentorship</TabsTrigger>
-                  <TabsTrigger value="cv">CV Assistance</TabsTrigger>
-                  <TabsTrigger value="articles">Articles</TabsTrigger>
+                <TabsList className="grid grid-cols-2 md:grid-cols-5 gap-1">
+                  <TabsTrigger value="all">
+                    All Resources
+                    <Badge variant="outline" className="ml-2">
+                      {sampleResources.length}
+                    </Badge>
+                  </TabsTrigger>
+                  <TabsTrigger value="workshops">
+                    Workshops
+                    <Badge variant="outline" className="ml-2">
+                      {workshopsCount}
+                    </Badge>
+                  </TabsTrigger>
+                  <TabsTrigger value="mentorship">
+                    Mentorship
+                    <Badge variant="outline" className="ml-2">
+                      {mentorshipCount}
+                    </Badge>
+                  </TabsTrigger>
+                  <TabsTrigger value="cv">
+                    CV Assistance
+                    <Badge variant="outline" className="ml-2">
+                      {cvCount}
+                    </Badge>
+                  </TabsTrigger>
+                  <TabsTrigger value="articles">
+                    Articles
+                    <Badge variant="outline" className="ml-2">
+                      {articlesCount}
+                    </Badge>
+                  </TabsTrigger>
                 </TabsList>
               </div>
               
@@ -162,11 +216,31 @@ const Resources = () => {
         <section className="py-12 bg-white">
           <div className="container mx-auto px-4">
             {filteredResources.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredResources.map((resource) => (
-                  <ResourceCard key={resource.id} resource={resource} />
-                ))}
-              </div>
+              <>
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold">
+                    {filteredResources.length} {filteredResources.length === 1 ? 'Resource' : 'Resources'} Available
+                  </h2>
+                  
+                  {activeTab !== "all" && (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setActiveTab("all")}
+                    >
+                      View All Resources
+                    </Button>
+                  )}
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredResources.map((resource) => (
+                    <div key={resource.id} className="group transition-all duration-200 hover:-translate-y-1">
+                      <ResourceCard resource={resource} />
+                    </div>
+                  ))}
+                </div>
+              </>
             ) : (
               <div className="text-center py-12">
                 <h3 className="text-xl font-semibold mb-2">No resources found</h3>
@@ -191,23 +265,67 @@ const Resources = () => {
             <div className="bg-white rounded-lg shadow-md p-8 border border-gray-100">
               <div className="flex flex-col md:flex-row gap-8">
                 <div className="md:w-2/3">
-                  <h2 className="text-2xl font-bold mb-4">Upcoming Featured Workshop</h2>
-                  <h3 className="text-xl text-primary font-medium mb-2">Resume Writing Masterclass</h3>
+                  <div className="flex items-center mb-2">
+                    <Badge className="bg-primary/10 text-primary border-primary/20">Featured</Badge>
+                    <span className="ml-2 text-sm text-gray-500">Limited spots available!</span>
+                  </div>
+                  <h2 className="text-2xl font-bold mb-4">Resume Writing Masterclass</h2>
                   <p className="text-gray-600 mb-4">
                     Join our professional career coaches for a hands-on workshop where you'll learn how to create 
                     a compelling resume that showcases your skills and experiences effectively.
                   </p>
-                  <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center mb-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                     <div className="flex items-center text-sm">
-                      <Calendar className="h-4 w-4 mr-1" />
+                      <Calendar className="h-4 w-4 mr-2 text-primary" />
                       <span>October 15, 2023</span>
                     </div>
                     <div className="flex items-center text-sm">
-                      <GraduationCap className="h-4 w-4 mr-1" />
+                      <Clock className="h-4 w-4 mr-2 text-primary" />
+                      <span>2:00 PM - 4:00 PM EAT</span>
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <MapPin className="h-4 w-4 mr-2 text-primary" />
                       <span>Online via Zoom</span>
                     </div>
+                    <div className="flex items-center text-sm">
+                      <Users className="h-4 w-4 mr-2 text-primary" />
+                      <span>30 spots available</span>
+                    </div>
                   </div>
-                  <Button>Register Now</Button>
+                  
+                  <HoverCard>
+                    <HoverCardTrigger asChild>
+                      <Button 
+                        onClick={() => setIsRegistering(true)}
+                        disabled={isRegistering}
+                      >
+                        {isRegistering ? "Registering..." : "Register Now"}
+                      </Button>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-80">
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-semibold">What you'll learn:</h4>
+                        <ul className="text-xs space-y-1">
+                          <li className="flex items-start">
+                            <Check className="h-3 w-3 mr-1 text-primary mt-0.5" />
+                            <span>Resume formatting and structure</span>
+                          </li>
+                          <li className="flex items-start">
+                            <Check className="h-3 w-3 mr-1 text-primary mt-0.5" />
+                            <span>ATS optimization techniques</span>
+                          </li>
+                          <li className="flex items-start">
+                            <Check className="h-3 w-3 mr-1 text-primary mt-0.5" />
+                            <span>Skills presentation strategies</span>
+                          </li>
+                          <li className="flex items-start">
+                            <Check className="h-3 w-3 mr-1 text-primary mt-0.5" />
+                            <span>Personalized feedback on your draft</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </HoverCardContent>
+                  </HoverCard>
                 </div>
                 <div className="md:w-1/3 flex items-center justify-center">
                   <div className="bg-primary/10 p-8 rounded-full">
