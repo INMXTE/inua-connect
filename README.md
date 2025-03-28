@@ -2,7 +2,7 @@
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/66d30122-72eb-4513-ae51-f87d20d75621
+**URL**: https://inua-connect.lovable.app/
 
 ## How can I edit this code?
 
