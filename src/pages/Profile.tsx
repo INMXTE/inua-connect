@@ -15,11 +15,12 @@ import {
   Settings 
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'; // Added import for Card component
 
 const Profile = () => {
   const { toast } = useToast();
   const [profileCompletion] = useState(75);
-  
+
   // Sample profile data
   const profileData = {
     name: "James Mwangi",
@@ -86,7 +87,7 @@ const Profile = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      
+
       <main className="flex-grow bg-gray-50 py-10">
         <div className="container mx-auto px-4">
           {/* Profile Overview */}
@@ -97,7 +98,7 @@ const Profile = () => {
                   <div className="bg-primary/10 rounded-full p-4">
                     <User className="h-16 w-16 text-primary" />
                   </div>
-                  
+
                   <div className="flex-grow">
                     <h1 className="text-2xl font-bold mb-1">{profileData.name}</h1>
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-gray-600 mb-4">
@@ -110,12 +111,12 @@ const Profile = () => {
                         <span>{profileData.email}</span>
                       </div>
                     </div>
-                    
+
                     <div className="mb-4">
                       <p className="text-sm text-gray-500 mb-1">Profile Completion: {profileCompletion}%</p>
                       <Progress value={profileCompletion} className="h-2" />
                     </div>
-                    
+
                     <div className="flex flex-wrap gap-2 mb-4">
                       {profileData.skills.map((skill, index) => (
                         <Badge key={index} variant="secondary" className="font-normal">
@@ -124,7 +125,7 @@ const Profile = () => {
                       ))}
                     </div>
                   </div>
-                  
+
                   <div>
                     <Button onClick={handleEditProfile}>Edit Profile</Button>
                   </div>
@@ -132,7 +133,7 @@ const Profile = () => {
               </CardContent>
             </Card>
           </div>
-          
+
           {/* Tabs for different sections */}
           <Tabs defaultValue="overview" className="space-y-8">
             <TabsList className="mx-auto">
@@ -141,7 +142,7 @@ const Profile = () => {
               <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
               <TabsTrigger value="applications">Applications</TabsTrigger>
             </TabsList>
-            
+
             {/* Overview Tab */}
             <TabsContent value="overview" className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -161,7 +162,7 @@ const Profile = () => {
                     </p>
                   </CardContent>
                 </Card>
-                
+
                 <Card>
                   <CardHeader>
                     <CardTitle>Interests</CardTitle>
@@ -179,7 +180,7 @@ const Profile = () => {
                   </CardContent>
                 </Card>
               </div>
-              
+
               <Card>
                 <CardHeader>
                   <CardTitle>Education & Experience</CardTitle>
@@ -197,7 +198,7 @@ const Profile = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div>
                     <h3 className="font-semibold text-lg mb-2">Experience</h3>
                     <div className="border-l-2 border-primary/30 pl-4">
@@ -219,7 +220,7 @@ const Profile = () => {
                   </div>
                 </CardContent>
               </Card>
-              
+
               <div className="flex justify-center">
                 <Button variant="outline" className="flex items-center">
                   <FileText className="mr-2 h-4 w-4" />
@@ -227,7 +228,7 @@ const Profile = () => {
                 </Button>
               </div>
             </TabsContent>
-            
+
             {/* Saved Jobs Tab */}
             <TabsContent value="saved-jobs">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -235,7 +236,7 @@ const Profile = () => {
                   <JobCard key={job.id} job={job} />
                 ))}
               </div>
-              
+
               {savedJobs.length === 0 && (
                 <div className="text-center py-12">
                   <h3 className="text-xl font-semibold mb-2">No saved jobs yet</h3>
@@ -248,7 +249,7 @@ const Profile = () => {
                 </div>
               )}
             </TabsContent>
-            
+
             {/* Recommendations Tab */}
             <TabsContent value="recommendations">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -257,7 +258,7 @@ const Profile = () => {
                 ))}
               </div>
             </TabsContent>
-            
+
             {/* Applications Tab */}
             <TabsContent value="applications">
               <div className="text-center py-12">
@@ -273,7 +274,7 @@ const Profile = () => {
           </Tabs>
         </div>
       </main>
-      
+
       <Footer />
     </div>
   );
