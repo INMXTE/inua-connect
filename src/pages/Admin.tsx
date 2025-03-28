@@ -5,13 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import RequireAuth from "@/components/RequireAuth";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import {
   Tabs,
@@ -20,7 +21,7 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
-import { Eye, EyeOff, Check, X } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 
 const ADMIN_PASSWORD = "admin123"; // In a real application, this would be stored securely
 
@@ -28,7 +29,7 @@ const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [activeTab, setActiveTab] = useState("jobs");
+  const [activeTab, setActiveTab] = useState("settings"); //default to settings
   const navigate = useNavigate();
 
   const handleLogin = (e: React.FormEvent) => {
@@ -99,159 +100,62 @@ const Admin = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <div className="bg-primary text-white py-6">
-        <div className="container mx-auto px-4">
-          <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-          <p>Manage your site content</p>
+    <RequireAuth requireAdmin>
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="bg-primary text-white py-6">
+          <div className="container mx-auto px-4">
+            <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+            <p>Manage your site content</p>
+          </div>
         </div>
-      </div>
-
-      <main className="flex-grow container mx-auto px-4 py-8">
-        <Tabs defaultValue="jobs" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-6">
-            <TabsTrigger value="jobs">Jobs</TabsTrigger>
-            <TabsTrigger value="resources">Resources</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="jobs">
-            <Card>
-              <CardHeader>
-                <CardTitle>Manage Job Listings</CardTitle>
-                <CardDescription>
-                  Add, edit, or remove job opportunities
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-medium">Job Listings</h3>
-                    <Button size="sm">Add New Job</Button>
-                  </div>
-                  
-                  <div className="border rounded-md divide-y">
-                    {/* Example job listing row */}
-                    <div className="p-4 flex justify-between items-center">
-                      <div>
-                        <h4 className="font-medium">Legal Aid Internship</h4>
-                        <p className="text-sm text-muted-foreground">Amka Africa • Nairobi, Kenya</p>
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">Edit</Button>
-                        <Button variant="destructive" size="sm">Delete</Button>
+        <main className="flex-grow container mx-auto p-4">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+            </TabsList>
+            <TabsContent value="settings">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Admin Settings</CardTitle>
+                  <CardDescription>
+                    Manage admin users and system settings
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="admin-password">Change Admin Password</Label>
+                      <div className="flex gap-2 mt-1">
+                        <Input type="password" id="admin-password" placeholder="New password" />
+                        <Button>Update</Button>
                       </div>
                     </div>
-                    
-                    <div className="p-4 flex justify-between items-center">
-                      <div>
-                        <h4 className="font-medium">Junior Software Developer</h4>
-                        <p className="text-sm text-muted-foreground">TechVentures • Nairobi, Kenya</p>
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">Edit</Button>
-                        <Button variant="destructive" size="sm">Delete</Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="resources">
-            <Card>
-              <CardHeader>
-                <CardTitle>Manage Resources</CardTitle>
-                <CardDescription>
-                  Add, edit, or remove learning resources and workshops
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-medium">Resources</h3>
-                    <Button size="sm">Add New Resource</Button>
-                  </div>
-                  
-                  <div className="border rounded-md divide-y">
-                    {/* Example resource listing row */}
-                    <div className="p-4 flex justify-between items-center">
-                      <div>
-                        <h4 className="font-medium">CV Writing Workshop</h4>
-                        <p className="text-sm text-muted-foreground">Workshop • Next Tuesday</p>
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">Edit</Button>
-                        <Button variant="destructive" size="sm">Delete</Button>
-                      </div>
-                    </div>
-                    
-                    <div className="p-4 flex justify-between items-center">
-                      <div>
-                        <h4 className="font-medium">Guide to Internships</h4>
-                        <p className="text-sm text-muted-foreground">Article • Published March 15</p>
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">Edit</Button>
-                        <Button variant="destructive" size="sm">Delete</Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="settings">
-            <Card>
-              <CardHeader>
-                <CardTitle>Admin Settings</CardTitle>
-                <CardDescription>
-                  Manage admin users and system settings
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="admin-password">Change Admin Password</Label>
-                    <div className="flex gap-2 mt-1">
-                      <Input type="password" id="admin-password" placeholder="New password" />
-                      <Button>Update</Button>
-                    </div>
-                  </div>
-                  
-                  <div className="pt-4">
-                    <Label>Site Moderation</Label>
-                    <div className="mt-2 space-y-2">
-                      <div className="flex items-center justify-between">
+                    <div className="pt-4">
+                      <Label>Site Moderation</Label>
+                      <div className="mt-2 space-y-2">
                         <div className="flex items-center space-x-2">
                           <Checkbox id="job-moderation" />
-                          <Label htmlFor="job-moderation" className="font-normal">Require approval for new job posts</Label>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox id="comment-moderation" />
-                          <Label htmlFor="comment-moderation" className="font-normal">Enable comments on resources</Label>
+                          <Label htmlFor="job-moderation" className="font-normal">
+                            Require approval for new job posts
+                          </Label>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-end">
-                <Button variant="outline" className="mr-2" onClick={() => navigate("/")}>
-                  Logout
-                </Button>
-                <Button>Save Settings</Button>
-              </CardFooter>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </main>
-    </div>
+                </CardContent>
+                <CardFooter className="flex justify-end">
+                  <Button variant="outline" className="mr-2" onClick={() => navigate("/")}>
+                    Logout
+                  </Button>
+                  <Button>Save Settings</Button>
+                </CardFooter>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </main>
+      </div>
+    </RequireAuth>
   );
 };
 
