@@ -1,11 +1,8 @@
 
-import { useState } from 'react';
-import { Briefcase, Calendar, Check, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-
-export type JobType = 'Full-time' | 'Part-time' | 'Internship' | 'Apprenticeship';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Bookmark, BookmarkCheck } from "lucide-react";
 
 export interface JobProps {
   id: string;
@@ -13,74 +10,77 @@ export interface JobProps {
   company: string;
   location: string;
   type: JobType;
-  salary?: string;
-  posted: string;
-  skills: string[];
+  salary: string;
   description: string;
+  requirements: string[];
+  postedDate: string;
 }
 
-interface JobCardProps {
-  job: JobProps;
-  compact?: boolean;
-}
+export type JobType = "Full-time" | "Part-time" | "Contract" | "Internship";
 
-const JobCard = ({ job, compact = false }: JobCardProps) => {
-  const [expanded, setExpanded] = useState(false);
-  
-  const toggleExpand = () => {
-    setExpanded(prev => !prev);
+const JobCard = (props: JobProps) => {
+  const [isSaved, setIsSaved] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const handleSave = () => {
+    setIsSaved(!isSaved);
+    // In a real app, save to backend
   };
-  
+
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardHeader className="pb-2">
+    <Card className="overflow-hidden">
+      <CardHeader>
         <div className="flex justify-between items-start">
           <div>
-            <CardTitle className="text-xl">{job.title}</CardTitle>
-            <div className="text-muted-foreground">{job.company} • {job.location}</div>
+            <CardTitle>{props.title}</CardTitle>
+            <CardDescription>{props.company}</CardDescription>
           </div>
-          <Badge variant={job.type === 'Internship' ? 'outline' : 'default'}>
-            {job.type}
-          </Badge>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={handleSave}
+            className="text-muted-foreground hover:text-primary"
+          >
+            {isSaved ? <BookmarkCheck className="h-5 w-5" /> : <Bookmark className="h-5 w-5" />}
+          </Button>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center text-sm text-muted-foreground gap-4 mb-4">
-          {job.salary && (
-            <div className="flex items-center">
-              <span className="mr-1">💰</span> {job.salary}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>{props.location}</span>
+            <span>•</span>
+            <span>{props.type}</span>
+            <span>•</span>
+            <span>{props.salary}</span>
+          </div>
+          
+          <p className="line-clamp-2">{props.description}</p>
+          
+          {isExpanded && (
+            <div className="mt-4 space-y-4">
+              <div>
+                <h4 className="font-medium mb-2">Requirements:</h4>
+                <ul className="list-disc list-inside space-y-1">
+                  {props.requirements.map((req, index) => (
+                    <li key={index}>{req}</li>
+                  ))}
+                </ul>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Posted: {props.postedDate}
+              </p>
             </div>
           )}
-          <div className="flex items-center">
-            <Calendar className="h-4 w-4 mr-1" /> Posted {job.posted}
-          </div>
-        </div>
-        
-        {(expanded || !compact) && (
-          <p className="text-sm text-gray-600 mb-4">
-            {job.description}
-          </p>
-        )}
-        
-        <div className="flex flex-wrap gap-2 mt-2">
-          {job.skills.map((skill, index) => (
-            <Badge key={index} variant="secondary" className="font-normal">
-              {skill}
-            </Badge>
-          ))}
         </div>
       </CardContent>
       <CardFooter>
         <Button 
           variant="outline" 
-          className="w-full flex items-center justify-center"
-          onClick={toggleExpand}
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-full"
         >
-          {expanded ? (
-            <>Hide Details <ChevronUp className="ml-2 h-4 w-4" /></>
-          ) : (
-            <>View Details <ChevronDown className="ml-2 h-4 w-4" /></>
-          )}
+          {isExpanded ? "Show Less" : "View Details"}
         </Button>
       </CardFooter>
     </Card>
