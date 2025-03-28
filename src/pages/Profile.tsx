@@ -1,21 +1,19 @@
-import { useState } from "react";
-import { ResourceProps } from "@/types/resources";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import ResourceCard from "@/components/ResourceCard";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Briefcase, 
-  GraduationCap, 
-  Award, 
-  BookOpen, 
-  Calendar, 
-  User, 
-  Settings 
-} from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'; // Added import for Card component
+import { useState } from 'react';
+import { Mail, User, GraduationCap, FileText } from 'lucide-react'; // Added FileText import
+import { Link } from 'react-router-dom';
+import { useToast } from '@/components/ui/use-toast';
+import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import type { JobProps } from '@/components/JobCard';
+import type { ResourceProps } from '@/components/ResourceCard';
+import JobCard from '@/components/JobCard'; // Added import for JobCard
+import ResourceCard from '@/components/ResourceCard'; // Added import for ResourceCard
+
 
 const Profile = () => {
   const { toast } = useToast();
@@ -32,7 +30,6 @@ const Profile = () => {
     interests: ["Software Development", "AI/Machine Learning", "Web Design"]
   };
 
-  // Sample saved jobs
   const savedJobs: JobProps[] = [
     {
       id: "1",
@@ -43,22 +40,10 @@ const Profile = () => {
       salary: "Ksh 60,000 - 80,000",
       posted: "1 week ago",
       skills: ["JavaScript", "React", "Node.js"],
-      description: "We are looking for a Junior Software Developer to join our dynamic team, working on innovative web applications for clients."
-    },
-    {
-      id: "4",
-      title: "Graduate Engineering Program",
-      company: "EcoInnovate",
-      location: "Kisumu, Kenya",
-      type: "Apprenticeship",
-      salary: "Ksh 45,000",
-      posted: "5 days ago",
-      skills: ["Engineering", "Sustainability", "Project Management"],
-      description: "12-month structured program for recent engineering graduates focusing on sustainable technology implementation."
+      description: "We are looking for a Junior Software Developer to join our dynamic team."
     }
   ];
 
-  // Sample recommended resources
   const recommendedResources: ResourceProps[] = [
     {
       id: "1",
@@ -66,14 +51,7 @@ const Profile = () => {
       type: "Workshop",
       icon: "workshop",
       date: "October 15, 2023",
-      description: "Learn how to craft a professional resume that stands out to employers and highlights your strengths effectively."
-    },
-    {
-      id: "3",
-      title: "Tech Career Mentorship",
-      type: "Mentorship",
-      icon: "mentorship",
-      description: "Connect with experienced professionals in the technology sector for personalized career guidance and networking."
+      description: "Learn how to craft a professional resume that stands out."
     }
   ];
 
@@ -90,7 +68,6 @@ const Profile = () => {
 
       <main className="flex-grow bg-gray-50 py-10">
         <div className="container mx-auto px-4">
-          {/* Profile Overview */}
           <div className="mb-10">
             <Card>
               <CardContent className="p-6">
@@ -134,7 +111,6 @@ const Profile = () => {
             </Card>
           </div>
 
-          {/* Tabs for different sections */}
           <Tabs defaultValue="overview" className="space-y-8">
             <TabsList className="mx-auto">
               <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -143,23 +119,34 @@ const Profile = () => {
               <TabsTrigger value="applications">Applications</TabsTrigger>
             </TabsList>
 
-            {/* Overview Tab */}
-            <TabsContent value="overview" className="space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="md:col-span-2">
+            <TabsContent value="overview">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> {/* Adjusted grid for better layout */}
+                <Card>
                   <CardHeader>
-                    <CardTitle>About Me</CardTitle>
-                    <CardDescription>A brief summary of your background and career goals</CardDescription>
+                    <CardTitle>Education & Experience</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-600 mb-4">
-                      I'm a final-year Computer Science student passionate about software development and AI applications.
-                      Looking for opportunities to apply my technical skills in innovative projects while continuing to learn and grow.
-                    </p>
-                    <p className="text-gray-600">
-                      <strong>Career Goals:</strong> To become a skilled full-stack developer with expertise in AI integration,
-                      working on projects that have meaningful social impact.
-                    </p>
+                    <div className="border-l-2 border-primary/30 pl-4 mb-4">
+                      <h4 className="font-medium">BSc in Computer Science</h4>
+                      <p className="text-sm text-gray-600">University of Nairobi | Expected: 2024</p>
+                      <p className="mt-1 text-sm">Relevant coursework: Data Structures, Algorithms, Web Development</p>
+                    </div>
+                    <div className="border-l-2 border-primary/30 pl-4"> {/*Experience section added back */}
+                      <div className="mb-4">
+                        <h4 className="font-medium">Student Developer</h4>
+                        <p className="text-sm text-gray-600">University IT Department | Jun 2023 - Present</p>
+                        <p className="mt-1 text-sm">
+                          Assisted in maintaining university web applications and developing new features.
+                        </p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium">Volunteer Web Developer</h4>
+                        <p className="text-sm text-gray-600">Local NGO | Jan 2023 - Apr 2023</p>
+                        <p className="mt-1 text-sm">
+                          Built and maintained website for a local non-profit organization.
+                        </p>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
 
@@ -180,48 +167,7 @@ const Profile = () => {
                   </CardContent>
                 </Card>
               </div>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Education & Experience</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="mb-6">
-                    <h3 className="font-semibold text-lg mb-2">Education</h3>
-                    <div className="border-l-2 border-primary/30 pl-4 mb-4">
-                      <div className="mb-4">
-                        <h4 className="font-medium">BSc in Computer Science</h4>
-                        <p className="text-sm text-gray-600">University of Nairobi | Expected Graduation: 2024</p>
-                        <p className="mt-1 text-sm">
-                          Relevant coursework: Data Structures, Algorithms, Database Systems, Web Development
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="font-semibold text-lg mb-2">Experience</h3>
-                    <div className="border-l-2 border-primary/30 pl-4">
-                      <div className="mb-4">
-                        <h4 className="font-medium">Student Developer</h4>
-                        <p className="text-sm text-gray-600">University IT Department | Jun 2023 - Present</p>
-                        <p className="mt-1 text-sm">
-                          Assisted in maintaining university web applications and developing new features.
-                        </p>
-                      </div>
-                      <div>
-                        <h4 className="font-medium">Volunteer Web Developer</h4>
-                        <p className="text-sm text-gray-600">Local NGO | Jan 2023 - Apr 2023</p>
-                        <p className="mt-1 text-sm">
-                          Built and maintained website for a local non-profit organization.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <div className="flex justify-center">
+              <div className="flex justify-center mt-6"> {/* Added back download CV button */}
                 <Button variant="outline" className="flex items-center">
                   <FileText className="mr-2 h-4 w-4" />
                   Download CV
@@ -229,7 +175,6 @@ const Profile = () => {
               </div>
             </TabsContent>
 
-            {/* Saved Jobs Tab */}
             <TabsContent value="saved-jobs">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {savedJobs.map(job => (
@@ -250,7 +195,6 @@ const Profile = () => {
               )}
             </TabsContent>
 
-            {/* Recommendations Tab */}
             <TabsContent value="recommendations">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {recommendedResources.map(resource => (
@@ -259,7 +203,6 @@ const Profile = () => {
               </div>
             </TabsContent>
 
-            {/* Applications Tab */}
             <TabsContent value="applications">
               <div className="text-center py-12">
                 <h3 className="text-xl font-semibold mb-2">No active applications</h3>
