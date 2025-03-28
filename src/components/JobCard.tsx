@@ -1,5 +1,6 @@
 
-import { Briefcase, Calendar, Check } from 'lucide-react';
+import { useState } from 'react';
+import { Briefcase, Calendar, Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,6 +25,12 @@ interface JobCardProps {
 }
 
 const JobCard = ({ job, compact = false }: JobCardProps) => {
+  const [expanded, setExpanded] = useState(false);
+  
+  const toggleExpand = () => {
+    setExpanded(prev => !prev);
+  };
+  
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader className="pb-2">
@@ -49,7 +56,7 @@ const JobCard = ({ job, compact = false }: JobCardProps) => {
           </div>
         </div>
         
-        {!compact && (
+        {(expanded || !compact) && (
           <p className="text-sm text-gray-600 mb-4">
             {job.description}
           </p>
@@ -64,7 +71,17 @@ const JobCard = ({ job, compact = false }: JobCardProps) => {
         </div>
       </CardContent>
       <CardFooter>
-        <Button variant="outline" className="w-full">View Details</Button>
+        <Button 
+          variant="outline" 
+          className="w-full flex items-center justify-center"
+          onClick={toggleExpand}
+        >
+          {expanded ? (
+            <>Hide Details <ChevronUp className="ml-2 h-4 w-4" /></>
+          ) : (
+            <>View Details <ChevronDown className="ml-2 h-4 w-4" /></>
+          )}
+        </Button>
       </CardFooter>
     </Card>
   );

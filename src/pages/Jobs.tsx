@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -86,6 +87,7 @@ const Jobs = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [jobType, setJobType] = useState<string>("");
   const [location, setLocation] = useState<string>("");
+  const [expandedCards, setExpandedCards] = useState<string[]>([]);
 
   const jobTypes: JobType[] = ["Full-time", "Part-time", "Internship", "Apprenticeship"];
   const locations = ["Nairobi, Kenya", "Mombasa, Kenya", "Kisumu, Kenya"];

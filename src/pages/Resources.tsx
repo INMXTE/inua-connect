@@ -1,19 +1,10 @@
-
+import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import ResourceCard, { ResourceProps } from "@/components/ResourceCard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import ResourceCard from "@/components/ResourceCard";
 import { Button } from "@/components/ui/button";
-import { Search, Calendar, GraduationCap, FileText, Clock, MapPin, Users } from "lucide-react";
-import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { 
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
+import { Calendar, GraduationCap, FileText, Check } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const sampleResources: ResourceProps[] = [
   {
@@ -98,7 +89,6 @@ const Resources = () => {
     return matchesSearch && matchesTab;
   });
 
-  // Count resources by type for badges
   const workshopsCount = sampleResources.filter(r => r.type === "Workshop").length;
   const mentorshipCount = sampleResources.filter(r => r.type === "Mentorship").length;
   const cvCount = sampleResources.filter(r => r.type === "CV Assistance").length;
@@ -109,7 +99,6 @@ const Resources = () => {
       <Navbar />
       
       <main className="flex-grow">
-        {/* Header */}
         <section className="bg-primary text-white py-12">
           <div className="container mx-auto px-4">
             <h1 className="text-3xl md:text-4xl font-bold mb-4">Career Resources</h1>
@@ -119,7 +108,6 @@ const Resources = () => {
           </div>
         </section>
         
-        {/* Search and Tabs */}
         <section className="py-8 bg-gray-50 border-b">
           <div className="container mx-auto px-4">
             <div className="max-w-xl mx-auto mb-6">
@@ -212,7 +200,6 @@ const Resources = () => {
           </div>
         </section>
         
-        {/* Resource Listings */}
         <section className="py-12 bg-white">
           <div className="container mx-auto px-4">
             {filteredResources.length > 0 ? (
@@ -259,7 +246,6 @@ const Resources = () => {
           </div>
         </section>
         
-        {/* Workshop Registration CTA */}
         <section className="py-12 bg-gray-50">
           <div className="container mx-auto px-4 max-w-4xl">
             <div className="bg-white rounded-lg shadow-md p-8 border border-gray-100">
