@@ -1,5 +1,7 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -10,23 +12,107 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { GraduationCap, Briefcase } from "lucide-react";
+import { GraduationCap, Briefcase, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const SignUp = () => {
   const navigate = useNavigate();
+  const { signUp } = useAuth();
   const [userType, setUserType] = useState<string>("student");
   const [formStep, setFormStep] = useState(1);
+  const [loading, setLoading] = useState(false);
   
-  const handleSubmit = (e: React.FormEvent) => {
+  // Form data state
+  const [formData, setFormData] = useState({
+    // Common fields
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    terms: false,
+    
+    // Student fields
+    university: "",
+    fieldOfStudy: "",
+    graduationYear: "",
+    studentId: "",
+    interests: "",
+    jobType: "",
+    bio: "",
+    
+    // Employer fields
+    companyName: "",
+    industry: "",
+    contactName: "",
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: value }));
+  };
+
+  const handleCheckboxChange = (checked: boolean) => {
+    setFormData(prev => ({ ...prev, terms: checked }));
+  };
+
+  const handleSelectChange = (id: string, value: string) => {
+    setFormData(prev => ({ ...prev, [id]: value }));
+  };
+  
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (formStep < 3) {
-      setFormStep(formStep + 1);
+    // For final step submission
+    if ((userType === "student" && formStep === 3) || userType === "employer") {
+      try {
+        setLoading(true);
+        
+        // Password confirmation check
+        if (formData.password !== formData.confirmPassword) {
+          toast.error("Passwords do not match");
+          return;
+        }
+        
+        // Prepare user metadata based on user type
+        const userData = userType === "student" 
+          ? {
+              firstName: formData.firstName,
+              lastName: formData.lastName,
+              userType: "student",
+              university: formData.university,
+              fieldOfStudy: formData.fieldOfStudy,
+              graduationYear: formData.graduationYear,
+              interests: formData.interests,
+              jobType: formData.jobType,
+              bio: formData.bio
+            }
+          : {
+              firstName: formData.firstName,
+              lastName: formData.lastName,
+              userType: "employer",
+              companyName: formData.companyName,
+              industry: formData.industry,
+              contactName: formData.contactName
+            };
+        
+        await signUp(formData.email, formData.password, userData);
+        
+        toast.success(`${userType === "student" ? "Student" : "Employer"} account created!`, {
+          description: "You can now sign in to access your account."
+        });
+        
+        navigate('/login');
+      } catch (error: any) {
+        toast.error("Registration failed", { 
+          description: error.message || "Please try again later" 
+        });
+      } finally {
+        setLoading(false);
+      }
     } else {
-      toast.success("Account created successfully!", {
-        description: "Welcome to Inua Stude! You can now start exploring opportunities."
-      });
-      navigate('/profile');
+      // Continue to next step for student registration
+      setFormStep(formStep + 1);
     }
   };
 
@@ -65,31 +151,67 @@ const SignUp = () => {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="firstName">First Name</Label>
-                          <Input id="firstName" placeholder="John" required />
+                          <Input 
+                            id="firstName" 
+                            placeholder="John" 
+                            value={formData.firstName}
+                            onChange={handleInputChange}
+                            required 
+                          />
                         </div>
                         <div>
                           <Label htmlFor="lastName">Last Name</Label>
-                          <Input id="lastName" placeholder="Doe" required />
+                          <Input 
+                            id="lastName" 
+                            placeholder="Doe" 
+                            value={formData.lastName}
+                            onChange={handleInputChange}
+                            required 
+                          />
                         </div>
                       </div>
                       
                       <div>
                         <Label htmlFor="email">Email</Label>
-                        <Input id="email" type="email" placeholder="john.doe@example.com" required />
+                        <Input 
+                          id="email" 
+                          type="email" 
+                          placeholder="john.doe@example.com" 
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          required 
+                        />
                       </div>
                       
                       <div>
                         <Label htmlFor="password">Password</Label>
-                        <Input id="password" type="password" required />
+                        <Input 
+                          id="password" 
+                          type="password"
+                          value={formData.password}
+                          onChange={handleInputChange}
+                          required 
+                        />
                       </div>
                       
                       <div>
                         <Label htmlFor="confirmPassword">Confirm Password</Label>
-                        <Input id="confirmPassword" type="password" required />
+                        <Input 
+                          id="confirmPassword" 
+                          type="password"
+                          value={formData.confirmPassword}
+                          onChange={handleInputChange}
+                          required 
+                        />
                       </div>
                       
                       <div className="flex items-center space-x-2">
-                        <Checkbox id="terms" required />
+                        <Checkbox 
+                          id="terms" 
+                          checked={formData.terms}
+                          onCheckedChange={handleCheckboxChange}
+                          required 
+                        />
                         <Label htmlFor="terms" className="text-sm">
                           I agree to the <Link to="/terms" className="text-primary hover:underline">Terms</Link> and <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
                         </Label>
@@ -105,17 +227,33 @@ const SignUp = () => {
                     <div className="space-y-4">
                       <div>
                         <Label htmlFor="university">University/College</Label>
-                        <Input id="university" placeholder="University of Nairobi" required />
+                        <Input 
+                          id="university" 
+                          placeholder="University of Nairobi" 
+                          value={formData.university}
+                          onChange={handleInputChange}
+                          required 
+                        />
                       </div>
                       
                       <div>
                         <Label htmlFor="fieldOfStudy">Field of Study</Label>
-                        <Input id="fieldOfStudy" placeholder="Computer Science" required />
+                        <Input 
+                          id="fieldOfStudy" 
+                          placeholder="Computer Science"
+                          value={formData.fieldOfStudy}
+                          onChange={handleInputChange}
+                          required 
+                        />
                       </div>
                       
                       <div>
                         <Label htmlFor="graduationYear">Expected Graduation Year</Label>
-                        <Select required>
+                        <Select
+                          value={formData.graduationYear}
+                          onValueChange={(value) => handleSelectChange("graduationYear", value)}
+                          required
+                        >
                           <SelectTrigger id="graduationYear">
                             <SelectValue placeholder="Select year" />
                           </SelectTrigger>
@@ -131,7 +269,12 @@ const SignUp = () => {
                       
                       <div>
                         <Label htmlFor="studentId">Student ID (Optional)</Label>
-                        <Input id="studentId" placeholder="Your student ID number" />
+                        <Input 
+                          id="studentId" 
+                          placeholder="Your student ID number"
+                          value={formData.studentId}
+                          onChange={handleInputChange}
+                        />
                       </div>
                       
                       <Button type="submit" className="w-full">Continue</Button>
@@ -144,7 +287,11 @@ const SignUp = () => {
                     <div className="space-y-4">
                       <div>
                         <Label htmlFor="interests">Career Interests</Label>
-                        <Select required>
+                        <Select
+                          value={formData.interests}
+                          onValueChange={(value) => handleSelectChange("interests", value)}
+                          required
+                        >
                           <SelectTrigger id="interests">
                             <SelectValue placeholder="Select your primary interest" />
                           </SelectTrigger>
@@ -164,7 +311,11 @@ const SignUp = () => {
                       
                       <div>
                         <Label htmlFor="jobType">Preferred Job Type</Label>
-                        <Select required>
+                        <Select
+                          value={formData.jobType}
+                          onValueChange={(value) => handleSelectChange("jobType", value)}
+                          required
+                        >
                           <SelectTrigger id="jobType">
                             <SelectValue placeholder="Select job type" />
                           </SelectTrigger>
@@ -183,10 +334,21 @@ const SignUp = () => {
                           id="bio"
                           className="flex h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                           placeholder="Tell us a bit about yourself, your skills and career goals..."
+                          value={formData.bio}
+                          onChange={handleInputChange}
                         />
                       </div>
                       
-                      <Button type="submit" className="w-full">Create Account</Button>
+                      <Button type="submit" className="w-full" disabled={loading}>
+                        {loading ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Creating Account...
+                          </>
+                        ) : (
+                          "Create Account"
+                        )}
+                      </Button>
                     </div>
                   </form>
                 )}
@@ -195,14 +357,47 @@ const SignUp = () => {
               <TabsContent value="employer">
                 <form onSubmit={handleSubmit}>
                   <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="firstName">First Name</Label>
+                        <Input 
+                          id="firstName" 
+                          placeholder="Jane" 
+                          value={formData.firstName}
+                          onChange={handleInputChange}
+                          required 
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="lastName">Last Name</Label>
+                        <Input 
+                          id="lastName" 
+                          placeholder="Smith" 
+                          value={formData.lastName}
+                          onChange={handleInputChange}
+                          required 
+                        />
+                      </div>
+                    </div>
+                    
                     <div>
                       <Label htmlFor="companyName">Company Name</Label>
-                      <Input id="companyName" placeholder="Acme Inc." required />
+                      <Input 
+                        id="companyName" 
+                        placeholder="Acme Inc." 
+                        value={formData.companyName}
+                        onChange={handleInputChange}
+                        required 
+                      />
                     </div>
                     
                     <div>
                       <Label htmlFor="industry">Industry</Label>
-                      <Select required>
+                      <Select
+                        value={formData.industry}
+                        onValueChange={(value) => handleSelectChange("industry", value)}
+                        required
+                      >
                         <SelectTrigger id="industry">
                           <SelectValue placeholder="Select industry" />
                         </SelectTrigger>
@@ -222,27 +417,71 @@ const SignUp = () => {
                     
                     <div>
                       <Label htmlFor="contactName">Contact Person Name</Label>
-                      <Input id="contactName" placeholder="Jane Smith" required />
+                      <Input 
+                        id="contactName" 
+                        placeholder="Jane Smith" 
+                        value={formData.contactName}
+                        onChange={handleInputChange}
+                        required 
+                      />
                     </div>
                     
                     <div>
-                      <Label htmlFor="employerEmail">Email</Label>
-                      <Input id="employerEmail" type="email" placeholder="contact@acmeinc.com" required />
+                      <Label htmlFor="email">Email</Label>
+                      <Input 
+                        id="email" 
+                        type="email" 
+                        placeholder="contact@acmeinc.com" 
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        required 
+                      />
                     </div>
                     
                     <div>
-                      <Label htmlFor="employerPassword">Password</Label>
-                      <Input id="employerPassword" type="password" required />
+                      <Label htmlFor="password">Password</Label>
+                      <Input 
+                        id="password" 
+                        type="password"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        required 
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="confirmPassword">Confirm Password</Label>
+                      <Input 
+                        id="confirmPassword" 
+                        type="password"
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                        required 
+                      />
                     </div>
                     
                     <div className="flex items-center space-x-2">
-                      <Checkbox id="employerTerms" required />
-                      <Label htmlFor="employerTerms" className="text-sm">
+                      <Checkbox 
+                        id="terms" 
+                        checked={formData.terms}
+                        onCheckedChange={handleCheckboxChange}
+                        required 
+                      />
+                      <Label htmlFor="terms" className="text-sm">
                         I agree to the <Link to="/terms" className="text-primary hover:underline">Terms</Link> and <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
                       </Label>
                     </div>
                     
-                    <Button type="submit" className="w-full">Create Employer Account</Button>
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Creating Account...
+                        </>
+                      ) : (
+                        "Create Employer Account"
+                      )}
+                    </Button>
                   </div>
                 </form>
               </TabsContent>

@@ -1,15 +1,19 @@
-
 import { useState } from "react";
+import { ResourceProps } from "@/types/resources";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ResourceCard from "@/components/ResourceCard";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import JobCard, { JobProps } from "@/components/JobCard";
-import ResourceCard, { ResourceProps } from "@/components/ResourceCard";
-import { FileText, GraduationCap, Link, Mail, User } from "lucide-react";
+import { 
+  Briefcase, 
+  GraduationCap, 
+  Award, 
+  BookOpen, 
+  Calendar, 
+  User, 
+  Settings 
+} from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 const Profile = () => {
