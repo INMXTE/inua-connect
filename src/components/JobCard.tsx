@@ -1,11 +1,22 @@
 
-import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { BookmarkCheck, Bookmark, MapPin, Building, CalendarDays, Briefcase } from 'lucide-react';
-import { JobProps } from '@/types/jobs';
-import { cn } from '@/lib/utils';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Bookmark, BookmarkCheck } from "lucide-react";
+
+export interface JobProps {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  type: JobType;
+  salary: string;
+  description: string;
+  requirements: string[];
+  postedDate: string;
+}
+
+export type JobType = "Full-time" | "Part-time" | "Contract" | "Internship";
 
 const JobCard = (props: JobProps) => {
   const [isSaved, setIsSaved] = useState(false);
@@ -13,22 +24,16 @@ const JobCard = (props: JobProps) => {
 
   const handleSave = () => {
     setIsSaved(!isSaved);
+    // In a real app, save to backend
   };
 
   return (
-    <Card className={cn(
-      "overflow-hidden transition-all duration-300",
-      isExpanded ? "shadow-xl" : "shadow-md",
-      "hover:shadow-xl hover:translate-y-[-4px]"
-    )}>
+    <Card className="overflow-hidden">
       <CardHeader>
         <div className="flex justify-between items-start">
           <div>
-            <CardTitle className="text-xl">{props.title}</CardTitle>
-            <CardDescription className="flex items-center gap-1">
-              <Building className="h-4 w-4" />
-              {props.company}
-            </CardDescription>
+            <CardTitle>{props.title}</CardTitle>
+            <CardDescription>{props.company}</CardDescription>
           </div>
           <Button 
             variant="ghost" 
@@ -41,65 +46,42 @@ const JobCard = (props: JobProps) => {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          <div className="flex flex-wrap gap-2">
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              <MapPin className="h-4 w-4" />
-              {props.location}
-            </div>
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              <Briefcase className="h-4 w-4" />
-              {props.type}
-            </div>
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              <CalendarDays className="h-4 w-4" />
-              {props.postedDate}
-            </div>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>{props.location}</span>
+            <span>•</span>
+            <span>{props.type}</span>
+            <span>•</span>
+            <span>{props.salary}</span>
           </div>
           
-          <div className="flex flex-wrap gap-2">
-            {props.skills?.map((skill, index) => (
-              <Badge key={index} variant="secondary">{skill}</Badge>
-            ))}
-          </div>
-          
-          <p className={cn(
-            "text-gray-600",
-            isExpanded ? "" : "line-clamp-2"
-          )}>{props.description}</p>
+          <p className="line-clamp-2">{props.description}</p>
           
           {isExpanded && (
-            <div className="space-y-4 animate-in fade-in-50 duration-300">
+            <div className="mt-4 space-y-4">
               <div>
                 <h4 className="font-medium mb-2">Requirements:</h4>
                 <ul className="list-disc list-inside space-y-1">
                   {props.requirements.map((req, index) => (
-                    <li key={index} className="text-gray-600">{req}</li>
+                    <li key={index}>{req}</li>
                   ))}
                 </ul>
               </div>
-              
-              <div>
-                <h4 className="font-medium mb-2">Benefits:</h4>
-                <ul className="list-disc list-inside space-y-1">
-                  {props.benefits?.map((benefit, index) => (
-                    <li key={index} className="text-gray-600">{benefit}</li>
-                  ))}
-                </ul>
-              </div>
+              <p className="text-sm text-muted-foreground">
+                Posted: {props.postedDate}
+              </p>
             </div>
           )}
         </div>
       </CardContent>
-      <CardFooter className="flex gap-2">
+      <CardFooter>
         <Button 
           variant="outline" 
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex-1"
+          className="w-full"
         >
           {isExpanded ? "Show Less" : "View Details"}
         </Button>
-        <Button className="flex-1">Apply Now</Button>
       </CardFooter>
     </Card>
   );
