@@ -1,0 +1,40 @@
+Link is not defined
+Link is not defined
+The above error occurred in the <Admin> component:
+
+    at Admin (https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/src/pages/Admin.tsx:26:51)
+    at RequireAuth (https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/src/components/RequireAuth.tsx:15:24)
+    at RenderedRoute (https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/node_modules/.vite/deps/react-router-dom.js?v=daf36e39:4069:5)
+    at Routes (https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/node_modules/.vite/deps/react-router-dom.js?v=daf36e39:4508:5)
+    at AuthProvider (https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/src/contexts/AuthContext.tsx:16:32)
+    at Router (https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/node_modules/.vite/deps/react-router-dom.js?v=daf36e39:4451:15)
+    at BrowserRouter (https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/node_modules/.vite/deps/react-router-dom.js?v=daf36e39:5196:5)
+    at Provider (https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/node_modules/.vite/deps/chunk-7MSDU5OG.js?v=daf36e39:38:15)
+    at TooltipProvider (https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=daf36e39:59:5)
+    at Provider (https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/node_modules/.vite/deps/react-redux.js?v=daf36e39:923:11)
+    at QueryClientProvider (https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/node_modules/.vite/deps/@tanstack_react-query.js?v=daf36e39:2794:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+
+at Admin (https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/src/pages/Admin.tsx:26:51)
+at RequireAuth (https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/src/components/RequireAuth.tsx:15:24)
+at RenderedRoute (https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/node_modules/.vite/deps/react-router-dom.js?v=daf36e39:4069:5)
+at Routes (https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/node_modules/.vite/deps/react-router-dom.js?v=daf36e39:4508:5)
+at AuthProvider (https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/src/contexts/AuthContext.tsx:16:32)
+at Router (https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/node_modules/.vite/deps/react-router-dom.js?v=daf36e39:4451:15)
+at BrowserRouter (https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/node_modules/.vite/deps/react-router-dom.js?v=daf36e39:5196:5)
+at Provider (https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/node_modules/.vite/deps/chunk-7MSDU5OG.js?v=daf36e39:38:15)
+at TooltipProvider (https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=daf36e39:59:5)
+at Provider (https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/node_modules/.vite/deps/react-redux.js?v=daf36e39:923:11)
+at QueryClientProvider (https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/node_modules/.vite/deps/@tanstack_react-query.js?v=daf36e39:2794:3)
+at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+at t.value (https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://2ca31b87-70df-4bbc-ac59-06182995466c-00-vsep9iwfut6w.kirk.replit.dev:3001/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+Link is not defined
