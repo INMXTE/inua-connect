@@ -33,8 +33,25 @@ const Profile = () => {
     github: "https://github.com/jamesmwangi",
     portfolio: "https://jamesmwangi.dev",
     cvUrl: null as string | null,
+    avatarUrl: null as string | null,
     bio: "A highly motivated and results-oriented individual with a passion for technology and innovation.",
   });
+
+  const handleProfileChange = (field: string, value: string | string[]) => {
+    setProfileData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setProfileData(prev => ({ ...prev, avatarUrl: url }));
+      toast({
+        title: "Profile Picture Updated",
+        description: "Your profile picture has been successfully updated.",
+      });
+    }
+  };
 
   const handleCVUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -107,17 +124,83 @@ const Profile = () => {
                   </div>
 
                   <div className="flex-grow">
-                    <h1 className="text-2xl font-bold mb-1">{profileData.name}</h1>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-gray-600 mb-4">
-                      <div className="flex items-center">
-                        <GraduationCap className="h-4 w-4 mr-1" />
-                        <span>{profileData.university}, {profileData.field}</span>
+                    {isEditing ? (
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-4">
+                          <div className="relative">
+                            <img 
+                              src={profileData.avatarUrl || "/placeholder.svg"} 
+                              alt="Profile" 
+                              className="h-20 w-20 rounded-full object-cover"
+                            />
+                            <input
+                              type="file"
+                              id="avatar-upload"
+                              className="hidden"
+                              accept="image/*"
+                              onChange={handleImageUpload}
+                            />
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="absolute bottom-0 right-0"
+                              onClick={() => document.getElementById('avatar-upload')?.click()}
+                            >
+                              Change
+                            </Button>
+                          </div>
+                          <div className="flex-1 space-y-2">
+                            <Input
+                              value={profileData.name}
+                              onChange={(e) => handleProfileChange('name', e.target.value)}
+                              placeholder="Full Name"
+                            />
+                            <Input
+                              value={profileData.email}
+                              onChange={(e) => handleProfileChange('email', e.target.value)}
+                              placeholder="Email"
+                              type="email"
+                            />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <Input
+                            value={profileData.university}
+                            onChange={(e) => handleProfileChange('university', e.target.value)}
+                            placeholder="Institution"
+                          />
+                          <Input
+                            value={profileData.field}
+                            onChange={(e) => handleProfileChange('field', e.target.value)}
+                            placeholder="Field of Study"
+                          />
+                          <Input
+                            value={profileData.graduationYear}
+                            onChange={(e) => handleProfileChange('graduationYear', e.target.value)}
+                            placeholder="Graduation Year"
+                          />
+                          <Input
+                            value={profileData.phone}
+                            onChange={(e) => handleProfileChange('phone', e.target.value)}
+                            placeholder="Phone Number"
+                          />
+                        </div>
                       </div>
-                      <div className="flex items-center">
-                        <Mail className="h-4 w-4 mr-1" />
-                        <span>{profileData.email}</span>
-                      </div>
-                    </div>
+                    ) : (
+                      <>
+                        <h1 className="text-2xl font-bold mb-1">{profileData.name}</h1>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-gray-600 mb-4">
+                          <div className="flex items-center">
+                            <GraduationCap className="h-4 w-4 mr-1" />
+                            <span>{profileData.university}, {profileData.field}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Mail className="h-4 w-4 mr-1" />
+                            <span>{profileData.email}</span>
+                          </div>
+                        </div>
+                      </>
+                    )}
 
                     <div className="mb-4">
                       <p className="text-sm text-gray-500 mb-1">Profile Completion: {profileCompletion}%</p>
