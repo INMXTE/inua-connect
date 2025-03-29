@@ -3,7 +3,7 @@ import React from 'react';
 function Header() {
   return (
     <header>
-      <h1>Inua Stude Initiative</h1>
+      <h1>Inua Stude Initiative Initiative</h1>
       {/* Add navigation links here */}
     </header>
   );
