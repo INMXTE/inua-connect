@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -13,8 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Search } from "lucide-react";
+
+const ITEMS_PER_PAGE = 9;
 
 const sampleJobs: JobProps[] = [
   {
@@ -83,14 +83,24 @@ const sampleJobs: JobProps[] = [
   }
 ];
 
+const jobTypes: JobType[] = ["Full-time", "Part-time", "Internship", "Apprenticeship"];
+const locations = ["Nairobi, Kenya", "Mombasa, Kenya", "Kisumu, Kenya"];
+
 const Jobs = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [jobType, setJobType] = useState<string>("");
   const [location, setLocation] = useState<string>("");
-  const [expandedCards, setExpandedCards] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [savedJobs, setSavedJobs] = useState<string[]>([]);
 
-  const jobTypes: JobType[] = ["Full-time", "Part-time", "Internship", "Apprenticeship"];
-  const locations = ["Nairobi, Kenya", "Mombasa, Kenya", "Kisumu, Kenya"];
+  const handleSaveJob = (jobId: string) => {
+    setSavedJobs(prev => {
+      if (prev.includes(jobId)) {
+        return prev.filter(id => id !== jobId);
+      }
+      return [...prev, jobId];
+    });
+  };
 
   const filteredJobs = sampleJobs.filter(job => {
     const matchesSearch = 
@@ -98,50 +108,76 @@ const Jobs = () => {
       job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
-    
+
     const matchesType = jobType ? job.type === jobType : true;
     const matchesLocation = location ? job.location === location : true;
-    
+
     return matchesSearch && matchesType && matchesLocation;
   });
 
+  const totalPages = Math.ceil(filteredJobs.length / ITEMS_PER_PAGE);
+  const paginatedJobs = filteredJobs.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    setCurrentPage(1);
   };
 
+  const Pagination = () => (
+    <div className="flex justify-center gap-2 my-4">
+      <Button
+        variant="outline"
+        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+        disabled={currentPage === 1}
+      >
+        Previous
+      </Button>
+      {Array.from({ length: totalPages }, (_, i) => (
+        <Button
+          key={i + 1}
+          variant={currentPage === i + 1 ? "default" : "outline"}
+          onClick={() => setCurrentPage(i + 1)}
+        >
+          {i + 1}
+        </Button>
+      ))}
+      <Button
+        variant="outline"
+        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+        disabled={currentPage === totalPages}
+      >
+        Next
+      </Button>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-background">
       <Navbar />
-      
-      <main className="flex-grow">
-        {/* Header */}
-        <section className="bg-primary text-white py-12">
-          <div className="container mx-auto px-4">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">Find Your Opportunity</h1>
-            <p className="text-lg opacity-90 max-w-2xl">
-              Browse through internships, apprenticeships, and job openings matched to your skills and interests.
-            </p>
-          </div>
-        </section>
-        
-        {/* Search and Filters */}
-        <section className="py-8 bg-gray-50 border-b">
-          <div className="container mx-auto px-4">
-            <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+
+      <main className="container mx-auto px-4 py-8">
+        <section className="mb-8">
+          <h1 className="text-4xl font-bold mb-4">Find Your Next Opportunity</h1>
+
+          <div className="bg-card p-6 rounded-lg shadow-sm">
+            <form onSubmit={handleSearch} className="grid md:grid-cols-6 gap-4">
               <div className="md:col-span-2">
-                <Label htmlFor="search">Search jobs</Label>
+                <Label htmlFor="search">Search</Label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-                  <Input 
+                  <Search className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
                     id="search"
-                    placeholder="Search by title, company, or skills..."
-                    className="pl-10"
+                    placeholder="Search jobs..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-8"
                   />
                 </div>
               </div>
-              
+
               <div>
                 <Label htmlFor="jobType">Job Type</Label>
                 <Select value={jobType} onValueChange={setJobType}>
@@ -149,14 +185,14 @@ const Jobs = () => {
                     <SelectValue placeholder="All Types" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all-types">All Types</SelectItem>
+                    <SelectItem value="">All Types</SelectItem>
                     {jobTypes.map((type) => (
                       <SelectItem key={type} value={type}>{type}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div>
                 <Label htmlFor="location">Location</Label>
                 <Select value={location} onValueChange={setLocation}>
@@ -164,15 +200,15 @@ const Jobs = () => {
                     <SelectValue placeholder="All Locations" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all-locations">All Locations</SelectItem>
+                    <SelectItem value="">All Locations</SelectItem>
                     {locations.map((loc) => (
                       <SelectItem key={loc} value={loc}>{loc}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              
-              <div className="md:col-span-4 flex justify-end">
+
+              <div className="md:col-span-2 flex justify-end">
                 <Button type="submit">
                   Search Jobs
                 </Button>
@@ -180,18 +216,24 @@ const Jobs = () => {
             </form>
           </div>
         </section>
-        
-        {/* Job Listings */}
-        <section className="py-12 bg-white">
+
+        <Pagination />
+
+        <section className="py-8">
           <div className="container mx-auto px-4">
             <h2 className="text-2xl font-bold mb-6">
               {filteredJobs.length} {filteredJobs.length === 1 ? 'Opportunity' : 'Opportunities'} Available
             </h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredJobs.length > 0 ? (
-                filteredJobs.map((job) => (
-                  <JobCard key={job.id} job={job} />
+              {paginatedJobs.length > 0 ? (
+                paginatedJobs.map((job) => (
+                  <JobCard 
+                    key={job.id} 
+                    job={job}
+                    onSave={handleSaveJob}
+                    isSaved={savedJobs.includes(job.id)}
+                  />
                 ))
               ) : (
                 <div className="col-span-full text-center py-12">
@@ -212,8 +254,10 @@ const Jobs = () => {
             </div>
           </div>
         </section>
+
+        <Pagination />
       </main>
-      
+
       <Footer />
     </div>
   );
