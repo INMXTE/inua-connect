@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Mail, User, GraduationCap, FileText } from 'lucide-react'; // Added FileText import
+import { Mail, User, GraduationCap, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { Progress } from '@/components/ui/progress';
@@ -11,15 +11,15 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import type { JobProps } from '@/components/JobCard';
 import type { ResourceProps } from '@/components/ResourceCard';
-import JobCard from '@/components/JobCard'; // Added import for JobCard
-import ResourceCard from '@/components/ResourceCard'; // Added import for ResourceCard
+import JobCard from '@/components/JobCard';
+import ResourceCard from '@/components/ResourceCard';
 
 
 const Profile = () => {
   const { toast } = useToast();
   const [profileCompletion] = useState(75);
+  const [isEditing, setIsEditing] = useState(false);
 
-  // Sample profile data
   const [profileData, setProfileData] = useState({
     name: "James Mwangi",
     email: "james.mwangi@example.com",
@@ -33,13 +33,12 @@ const Profile = () => {
     github: "https://github.com/jamesmwangi",
     portfolio: "https://jamesmwangi.dev",
     cvUrl: null as string | null,
+    bio: "A highly motivated and results-oriented individual with a passion for technology and innovation.",
   });
 
   const handleCVUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Here you would typically upload to your storage solution
-      // For now, we'll just create an object URL
       const url = URL.createObjectURL(file);
       setProfileData(prev => ({ ...prev, cvUrl: url }));
       toast({
@@ -75,10 +74,16 @@ const Profile = () => {
   ];
 
   const handleEditProfile = () => {
-    toast({
-      title: "Edit Profile",
-      description: "Profile editing would open here. This feature is under development.",
-    });
+    setIsEditing(!isEditing);
+  };
+
+  const handleSaveProfile = () => {
+    toast({ title: 'Profile Saved', description: 'Your profile has been saved.' });
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
   };
 
   const handleDownloadCV = () => {
@@ -126,11 +131,24 @@ const Profile = () => {
                         </Badge>
                       ))}
                     </div>
+                    {isEditing ? (
+                      <div>
+                        <textarea value={profileData.bio} onChange={(e)=> setProfileData({...profileData, bio: e.target.value})} placeholder="Enter Bio"/>
+                        <div className="mt-4 flex justify-end gap-2">
+                          <Button onClick={handleSaveProfile}>Save</Button>
+                          <Button variant="ghost" onClick={handleCancelEdit}>Cancel</Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="mt-4">
+                        <p className="text-gray-600">{profileData.bio}</p>
+                      </div>
+                    )}
                   </div>
 
                   <div>
                     <div className="flex gap-2">
-                      <Button onClick={handleEditProfile}>Edit Profile</Button>
+                      <Button onClick={handleEditProfile}>{isEditing ? 'Cancel Edit' : 'Edit Profile'}</Button>
                       <div className="relative">
                         <input
                           type="file"
@@ -166,7 +184,7 @@ const Profile = () => {
             </TabsList>
 
             <TabsContent value="overview">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> {/* Adjusted grid for better layout */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
                   <CardHeader>
                     <CardTitle>Education & Experience</CardTitle>
@@ -177,7 +195,7 @@ const Profile = () => {
                       <p className="text-sm text-gray-600">University of Nairobi | Expected: 2024</p>
                       <p className="mt-1 text-sm">Relevant coursework: Data Structures, Algorithms, Web Development</p>
                     </div>
-                    <div className="border-l-2 border-primary/30 pl-4"> {/*Experience section added back */}
+                    <div className="border-l-2 border-primary/30 pl-4">
                       <div className="mb-4">
                         <h4 className="font-medium">Student Developer</h4>
                         <p className="text-sm text-gray-600">University IT Department | Jun 2023 - Present</p>
@@ -213,7 +231,7 @@ const Profile = () => {
                   </CardContent>
                 </Card>
               </div>
-              <div className="flex justify-center mt-6"> {/* Added back download CV button */}
+              <div className="flex justify-center mt-6">
                 <Button variant="outline" className="flex items-center">
                   <FileText className="mr-2 h-4 w-4" />
                   Download CV
