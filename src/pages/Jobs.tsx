@@ -109,8 +109,8 @@ const Jobs = () => {
       job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const matchesType = jobType === "all" || job.type === jobType;
-    const matchesLocation = location === "all" || job.location === location;
+    const matchesType = jobType ? job.type === jobType : true;
+    const matchesLocation = location ? job.location === location : true;
 
     return matchesSearch && matchesType && matchesLocation;
   });
@@ -185,7 +185,7 @@ const Jobs = () => {
                     <SelectValue placeholder="All Types" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="">All Types</SelectItem>
                     {jobTypes.map((type) => (
                       <SelectItem key={type} value={type}>{type}</SelectItem>
                     ))}
@@ -200,7 +200,7 @@ const Jobs = () => {
                     <SelectValue placeholder="All Locations" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Locations</SelectItem>
+                    <SelectItem value="">All Locations</SelectItem>
                     {locations.map((loc) => (
                       <SelectItem key={loc} value={loc}>{loc}</SelectItem>
                     ))}

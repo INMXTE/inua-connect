@@ -1,8 +1,10 @@
+
 import { useState } from 'react';
-import { Bookmark, BookmarkCheck, ChevronDown, ChevronUp } from 'lucide-react';
+import { Bookmark, BookmarkCheck, Briefcase, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export type JobType = 'Full-time' | 'Part-time' | 'Internship' | 'Apprenticeship';
 
@@ -21,13 +23,17 @@ export interface JobProps {
 interface JobCardProps {
   job: JobProps;
   compact?: boolean;
-  onSave: (id: string) => void;
-  isSaved: boolean;
+  onSave?: (jobId: string) => void;
+  isSaved?: boolean;
 }
 
 const JobCard = ({ job, compact = false, onSave, isSaved = false }: JobCardProps) => {
   const [expanded, setExpanded] = useState(false);
   const [saved, setSaved] = useState(isSaved);
+  
+  const toggleExpand = () => {
+    setExpanded(prev => !prev);
+  };
 
   const handleSave = () => {
     setSaved(prev => !prev);
@@ -35,9 +41,9 @@ const JobCard = ({ job, compact = false, onSave, isSaved = false }: JobCardProps
       onSave(job.id);
     }
   };
-
+  
   return (
-    <Card className="overflow-hidden">
+    <Card className="hover:shadow-md transition-shadow">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div>
@@ -49,7 +55,7 @@ const JobCard = ({ job, compact = false, onSave, isSaved = false }: JobCardProps
               variant="ghost" 
               size="icon"
               onClick={handleSave}
-              className={`text-muted-foreground hover:text-primary ${saved ? 'text-primary' : ''}`}
+              className="text-muted-foreground hover:text-primary"
             >
               {saved ? <BookmarkCheck className="h-5 w-5" /> : <Bookmark className="h-5 w-5" />}
             </Button>
@@ -67,33 +73,46 @@ const JobCard = ({ job, compact = false, onSave, isSaved = false }: JobCardProps
             </div>
           )}
           <div className="flex items-center">
-            <span className="mr-1">📅</span> Posted {job.posted}
+            <Calendar className="h-4 w-4 mr-1" /> Posted {job.posted}
           </div>
         </div>
-
-        <div className={`${expanded ? '' : 'line-clamp-2'}`}>
-          <p className="text-sm text-muted-foreground">{job.description}</p>
+        
+        <AnimatePresence>
+          {expanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden"
+            >
+              <p className="text-sm text-gray-600 mb-4">
+                {job.description}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        
+        <div className="flex flex-wrap gap-2 mt-2">
+          {job.skills.map((skill, index) => (
+            <Badge key={index} variant="secondary" className="font-normal">
+              {skill}
+            </Badge>
+          ))}
         </div>
-
-        {!compact && (
-          <div className="flex flex-wrap gap-2 mt-4">
-            {job.skills.map((skill) => (
-              <Badge key={skill} variant="secondary">
-                {skill}
-              </Badge>
-            ))}
-          </div>
-        )}
       </CardContent>
-      <CardFooter className="flex justify-between items-center pt-2">
-        <Button variant="link" onClick={() => setExpanded(!expanded)} className="px-0">
+      <CardFooter>
+        <Button 
+          variant="outline" 
+          onClick={toggleExpand}
+          className="w-full"
+        >
           {expanded ? (
-            <>View Less <ChevronUp className="ml-1 h-4 w-4" /></>
+            <>Hide Details <ChevronUp className="ml-2 h-4 w-4" /></>
           ) : (
-            <>View More <ChevronDown className="ml-1 h-4 w-4" /></>
+            <>View Details <ChevronDown className="ml-2 h-4 w-4" /></>
           )}
         </Button>
-        <Button>Apply Now</Button>
       </CardFooter>
     </Card>
   );
