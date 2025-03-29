@@ -43,5 +43,18 @@ const jobsSlice = createSlice({
   },
 });
 
-export const { setJobs, addJob, updateJob, deleteJob, saveJob, unsaveJob } = jobsSlice.actions;
+toggleSavedJob: (state, action: PayloadAction<JobProps>) => {
+      const jobId = action.payload.id;
+      const isJobSaved = state.savedJobs.some(job => job.id === jobId);
+      
+      if (isJobSaved) {
+        state.savedJobs = state.savedJobs.filter(job => job.id !== jobId);
+      } else {
+        state.savedJobs.push(action.payload);
+      }
+    },
+  },
+});
+
+export const { setJobs, addJob, updateJob, deleteJob, saveJob, unsaveJob, toggleSavedJob } = jobsSlice.actions;
 export default jobsSlice.reducer;
