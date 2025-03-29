@@ -1,3 +1,4 @@
+
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { JobProps } from '@/components/JobCard';
 
@@ -40,10 +41,7 @@ const jobsSlice = createSlice({
     unsaveJob: (state, action: PayloadAction<string>) => {
       state.savedJobs = state.savedJobs.filter(job => job.id !== action.payload);
     },
-  },
-});
-
-toggleSavedJob: (state, action: PayloadAction<JobProps>) => {
+    toggleSavedJob: (state, action: PayloadAction<JobProps>) => {
       const jobId = action.payload.id;
       const isJobSaved = state.savedJobs.some(job => job.id === jobId);
       
@@ -52,8 +50,8 @@ toggleSavedJob: (state, action: PayloadAction<JobProps>) => {
       } else {
         state.savedJobs.push(action.payload);
       }
-    },
-  },
+    }
+  }
 });
 
 export const { setJobs, addJob, updateJob, deleteJob, saveJob, unsaveJob, toggleSavedJob } = jobsSlice.actions;
