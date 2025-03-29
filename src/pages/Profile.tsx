@@ -1,246 +1,224 @@
+import { useState } from 'react';
+import { Mail, User, GraduationCap, FileText } from 'lucide-react'; // Added FileText import
+import { Link } from 'react-router-dom';
+import { useToast } from '@/components/ui/use-toast';
+import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import type { JobProps } from '@/components/JobCard';
+import type { ResourceProps } from '@/components/ResourceCard';
+import JobCard from '@/components/JobCard'; // Added import for JobCard
+import ResourceCard from '@/components/ResourceCard'; // Added import for ResourceCard
 
-import { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { User, Mail, Phone, MapPin, Briefcase, Upload, GraduationCap, Calendar } from "lucide-react";
-import JobCard from "@/components/JobCard";
-import Navbar from "@/components/Navbar";
 
 const Profile = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [isEditing, setIsEditing] = useState(false);
-  const [profile, setProfile] = useState({
-    name: user?.displayName || "",
-    email: user?.email || "",
-    phone: "",
-    location: "",
-    profession: "",
-    education: "",
-    experience: "",
-    skills: "",
-    bio: "",
-    graduationYear: "",
-  });
-  const [savedJobs] = useState([]);
-  const [cv, setCv] = useState<File | null>(null);
+  const { toast } = useToast();
+  const [profileCompletion] = useState(75);
 
-  const handleProfileUpdate = () => {
-    setIsEditing(false);
-    // In a real app, save to backend
+  // Sample profile data
+  const profileData = {
+    name: "James Mwangi",
+    email: "james.mwangi@example.com",
+    university: "University of Nairobi",
+    field: "Computer Science",
+    graduationYear: "2024",
+    skills: ["JavaScript", "React", "Python", "Data Analysis", "UI/UX Design"],
+    interests: ["Software Development", "AI/Machine Learning", "Web Design"]
   };
 
-  const handleCvUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setCv(file);
-      // In a real app, upload to storage
+  const savedJobs: JobProps[] = [
+    {
+      id: "1",
+      title: "Junior Software Developer",
+      company: "TechVentures",
+      location: "Nairobi, Kenya",
+      type: "Full-time",
+      salary: "Ksh 60,000 - 80,000",
+      posted: "1 week ago",
+      skills: ["JavaScript", "React", "Node.js"],
+      description: "We are looking for a Junior Software Developer to join our dynamic team."
     }
+  ];
+
+  const recommendedResources: ResourceProps[] = [
+    {
+      id: "1",
+      title: "Resume Writing Workshop",
+      type: "Workshop",
+      icon: "workshop",
+      date: "October 15, 2023",
+      description: "Learn how to craft a professional resume that stands out."
+    }
+  ];
+
+  const handleEditProfile = () => {
+    toast({
+      title: "Edit Profile",
+      description: "Profile editing would open here. This feature is under development.",
+    });
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="container mx-auto py-8 px-4">
-        <div className="grid gap-8 md:grid-cols-[1fr_2fr]">
-          <div className="space-y-6">
+
+      <main className="flex-grow bg-gray-50 py-10">
+        <div className="container mx-auto px-4">
+          <div className="mb-10">
             <Card>
-              <CardHeader>
-                <CardTitle>Profile</CardTitle>
-                <CardDescription>Your personal information</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center space-x-4">
-                  <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center">
-                    <User className="h-10 w-10" />
+              <CardContent className="p-6">
+                <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+                  <div className="bg-primary/10 rounded-full p-4">
+                    <User className="h-16 w-16 text-primary" />
                   </div>
+
+                  <div className="flex-grow">
+                    <h1 className="text-2xl font-bold mb-1">{profileData.name}</h1>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-gray-600 mb-4">
+                      <div className="flex items-center">
+                        <GraduationCap className="h-4 w-4 mr-1" />
+                        <span>{profileData.university}, {profileData.field}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <Mail className="h-4 w-4 mr-1" />
+                        <span>{profileData.email}</span>
+                      </div>
+                    </div>
+
+                    <div className="mb-4">
+                      <p className="text-sm text-gray-500 mb-1">Profile Completion: {profileCompletion}%</p>
+                      <Progress value={profileCompletion} className="h-2" />
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {profileData.skills.map((skill, index) => (
+                        <Badge key={index} variant="secondary" className="font-normal">
+                          {skill}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
                   <div>
-                    <h3 className="font-medium">{profile.name}</h3>
-                    <p className="text-sm text-muted-foreground">{profile.profession}</p>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-sm font-medium">Profile Completion</p>
-                  <Progress value={75} className="h-2" />
-                </div>
-                <div className="space-y-4">
-                  {isEditing ? (
-                    <>
-                      <div className="space-y-2">
-                        <Label>Full Name</Label>
-                        <Input 
-                          value={profile.name}
-                          onChange={(e) => setProfile({...profile, name: e.target.value})}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Email</Label>
-                        <Input 
-                          value={profile.email}
-                          onChange={(e) => setProfile({...profile, email: e.target.value})}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Phone</Label>
-                        <Input 
-                          value={profile.phone}
-                          onChange={(e) => setProfile({...profile, phone: e.target.value})}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Location</Label>
-                        <Input 
-                          value={profile.location}
-                          onChange={(e) => setProfile({...profile, location: e.target.value})}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Profession</Label>
-                        <Input 
-                          value={profile.profession}
-                          onChange={(e) => setProfile({...profile, profession: e.target.value})}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Education</Label>
-                        <Input 
-                          value={profile.education}
-                          onChange={(e) => setProfile({...profile, education: e.target.value})}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Graduation Year</Label>
-                        <Input 
-                          value={profile.graduationYear}
-                          onChange={(e) => setProfile({...profile, graduationYear: e.target.value})}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Experience</Label>
-                        <Textarea 
-                          value={profile.experience}
-                          onChange={(e) => setProfile({...profile, experience: e.target.value})}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Skills</Label>
-                        <Textarea 
-                          value={profile.skills}
-                          onChange={(e) => setProfile({...profile, skills: e.target.value})}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Bio</Label>
-                        <Textarea 
-                          value={profile.bio}
-                          onChange={(e) => setProfile({...profile, bio: e.target.value})}
-                        />
-                      </div>
-                      <Button onClick={handleProfileUpdate} className="w-full">Save Changes</Button>
-                    </>
-                  ) : (
-                    <>
-                      <div className="space-y-3">
-                        <div className="flex items-center space-x-2">
-                          <Mail className="h-4 w-4 text-muted-foreground" />
-                          <span>{profile.email}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Phone className="h-4 w-4 text-muted-foreground" />
-                          <span>{profile.phone || "Add phone number"}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <MapPin className="h-4 w-4 text-muted-foreground" />
-                          <span>{profile.location || "Add location"}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Briefcase className="h-4 w-4 text-muted-foreground" />
-                          <span>{profile.profession || "Add profession"}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <GraduationCap className="h-4 w-4 text-muted-foreground" />
-                          <span>{profile.education || "Add education"}</span>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
-                          <span>{profile.graduationYear || "Add graduation year"}</span>
-                        </div>
-                      </div>
-                      <Button onClick={() => setIsEditing(true)} variant="outline" className="w-full">
-                        Edit Profile
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>CV/Resume</CardTitle>
-                <CardDescription>Upload your latest CV</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="border-2 border-dashed rounded-lg p-4 text-center">
-                    <Input
-                      type="file"
-                      id="cv"
-                      className="hidden"
-                      accept=".pdf,.doc,.docx"
-                      onChange={handleCvUpload}
-                    />
-                    <Label
-                      htmlFor="cv"
-                      className="flex flex-col items-center cursor-pointer"
-                    >
-                      <Upload className="h-8 w-8 mb-2 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">
-                        {cv ? cv.name : "Click to upload CV"}
-                      </span>
-                    </Label>
+                    <Button onClick={handleEditProfile}>Edit Profile</Button>
                   </div>
                 </div>
               </CardContent>
             </Card>
-
-            <Button 
-              className="w-full"
-              onClick={() => navigate('/jobs')}
-            >
-              Find Opportunities
-            </Button>
           </div>
 
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Saved Jobs</CardTitle>
-                <CardDescription>Jobs you've saved for later</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {savedJobs.length > 0 ? (
-                  <div className="space-y-4">
-                    {savedJobs.map((job) => (
-                      <JobCard key={job.id} {...job} />
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-muted-foreground py-8">
-                    No saved jobs yet. Start exploring opportunities!
+          <Tabs defaultValue="overview" className="space-y-8">
+            <TabsList className="mx-auto">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="saved-jobs">Saved Jobs</TabsTrigger>
+              <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
+              <TabsTrigger value="applications">Applications</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="overview">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> {/* Adjusted grid for better layout */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Education & Experience</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="border-l-2 border-primary/30 pl-4 mb-4">
+                      <h4 className="font-medium">BSc in Computer Science</h4>
+                      <p className="text-sm text-gray-600">University of Nairobi | Expected: 2024</p>
+                      <p className="mt-1 text-sm">Relevant coursework: Data Structures, Algorithms, Web Development</p>
+                    </div>
+                    <div className="border-l-2 border-primary/30 pl-4"> {/*Experience section added back */}
+                      <div className="mb-4">
+                        <h4 className="font-medium">Student Developer</h4>
+                        <p className="text-sm text-gray-600">University IT Department | Jun 2023 - Present</p>
+                        <p className="mt-1 text-sm">
+                          Assisted in maintaining university web applications and developing new features.
+                        </p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium">Volunteer Web Developer</h4>
+                        <p className="text-sm text-gray-600">Local NGO | Jan 2023 - Apr 2023</p>
+                        <p className="mt-1 text-sm">
+                          Built and maintained website for a local non-profit organization.
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Interests</CardTitle>
+                    <CardDescription>Areas you're interested in exploring</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {profileData.interests.map((interest, index) => (
+                        <li key={index} className="flex items-center">
+                          <div className="h-2 w-2 rounded-full bg-primary mr-2"></div>
+                          {interest}
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
+              <div className="flex justify-center mt-6"> {/* Added back download CV button */}
+                <Button variant="outline" className="flex items-center">
+                  <FileText className="mr-2 h-4 w-4" />
+                  Download CV
+                </Button>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="saved-jobs">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {savedJobs.map(job => (
+                  <JobCard key={job.id} job={job} />
+                ))}
+              </div>
+
+              {savedJobs.length === 0 && (
+                <div className="text-center py-12">
+                  <h3 className="text-xl font-semibold mb-2">No saved jobs yet</h3>
+                  <p className="text-gray-600 mb-4">
+                    Browse opportunities and save jobs that interest you for future reference.
                   </p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                  <Button variant="outline" asChild>
+                    <Link href="/jobs">Browse Jobs</Link>
+                  </Button>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="recommendations">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {recommendedResources.map(resource => (
+                  <ResourceCard key={resource.id} resource={resource} />
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="applications">
+              <div className="text-center py-12">
+                <h3 className="text-xl font-semibold mb-2">No active applications</h3>
+                <p className="text-gray-600 mb-4">
+                  When you apply for opportunities, they will appear here for easy tracking.
+                </p>
+                <Button asChild>
+                  <Link href="/jobs">Find Opportunities</Link>
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 };
