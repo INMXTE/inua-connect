@@ -2,6 +2,12 @@ import { useState } from "react";
 import { Mail, User, GraduationCap, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
+import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -30,6 +36,20 @@ const Profile = () => {
     graduationYear: "2024",
     skills: ["JavaScript", "React", "Python", "Data Analysis", "UI/UX Design"],
     interests: ["Software Development", "AI/Machine Learning", "Web Design"],
+    education: [
+      {
+        institution: "University of Nairobi",
+        degree: "Bachelor of Science in Computer Science",
+        year: "2020-2024"
+      }
+    ],
+    experience: [
+      {
+        company: "Tech Solutions Ltd",
+        position: "Software Developer Intern",
+        duration: "Jun 2023 - Present"
+      }
+    ],
     linkedIn: "https://linkedin.com/in/jamesmwangi",
     github: "https://github.com/jamesmwangi",
     portfolio: "https://jamesmwangi.dev",
@@ -126,13 +146,13 @@ const Profile = () => {
 
                   <div className="flex-grow">
                     {isEditing ? (
-                      <div className="space-y-4">
+                      <div className="space-y-6">
                         <div className="flex items-center gap-4">
                           <div className="relative">
                             <img 
                               src={profileData.avatarUrl || "/placeholder.svg"} 
                               alt="Profile" 
-                              className="h-20 w-20 rounded-full object-cover"
+                              className="h-32 w-32 rounded-full object-cover border-4 border-primary/20"
                             />
                             <input
                               type="file"
@@ -186,11 +206,99 @@ const Profile = () => {
                             placeholder="Phone Number"
                           />
                         </div>
+
+                        <div className="space-y-4">
+                          <div>
+                            <Label>Education</Label>
+                            {profileData.education.map((edu, index) => (
+                              <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+                                <Input
+                                  value={edu.institution}
+                                  onChange={(e) => {
+                                    const newEducation = [...profileData.education];
+                                    newEducation[index].institution = e.target.value;
+                                    handleProfileChange('education', newEducation);
+                                  }}
+                                  placeholder="Institution"
+                                />
+                                <Input
+                                  value={edu.degree}
+                                  onChange={(e) => {
+                                    const newEducation = [...profileData.education];
+                                    newEducation[index].degree = e.target.value;
+                                    handleProfileChange('education', newEducation);
+                                  }}
+                                  placeholder="Degree"
+                                />
+                                <Input
+                                  value={edu.year}
+                                  onChange={(e) => {
+                                    const newEducation = [...profileData.education];
+                                    newEducation[index].year = e.target.value;
+                                    handleProfileChange('education', newEducation);
+                                  }}
+                                  placeholder="Year"
+                                />
+                              </div>
+                            ))}
+                          </div>
+
+                          <div>
+                            <Label>Experience</Label>
+                            {profileData.experience.map((exp, index) => (
+                              <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+                                <Input
+                                  value={exp.company}
+                                  onChange={(e) => {
+                                    const newExperience = [...profileData.experience];
+                                    newExperience[index].company = e.target.value;
+                                    handleProfileChange('experience', newExperience);
+                                  }}
+                                  placeholder="Company"
+                                />
+                                <Input
+                                  value={exp.position}
+                                  onChange={(e) => {
+                                    const newExperience = [...profileData.experience];
+                                    newExperience[index].position = e.target.value;
+                                    handleProfileChange('experience', newExperience);
+                                  }}
+                                  placeholder="Position"
+                                />
+                                <Input
+                                  value={exp.duration}
+                                  onChange={(e) => {
+                                    const newExperience = [...profileData.experience];
+                                    newExperience[index].duration = e.target.value;
+                                    handleProfileChange('experience', newExperience);
+                                  }}
+                                  placeholder="Duration"
+                                />
+                              </div>
+                            ))}
+                          </div>
+
+                          <div>
+                            <Label>Interests</Label>
+                            <Input
+                              value={profileData.interests.join(", ")}
+                              onChange={(e) => handleProfileChange('interests', e.target.value.split(", "))}
+                              placeholder="Enter interests separated by commas"
+                            />
+                          </div>
+                        </div>
                       </div>
                     ) : (
                       <>
-                        <h1 className="text-2xl font-bold mb-1">{profileData.name}</h1>
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-gray-600 mb-4">
+                        <div className="flex items-center gap-4 mb-6">
+                          <img 
+                            src={profileData.avatarUrl || "/placeholder.svg"} 
+                            alt="Profile" 
+                            className="h-32 w-32 rounded-full object-cover border-4 border-primary/20"
+                          />
+                          <div>
+                            <h1 className="text-2xl font-bold mb-1">{profileData.name}</h1>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-gray-600">
                           <div className="flex items-center">
                             <GraduationCap className="h-4 w-4 mr-1" />
                             <span>{profileData.university}, {profileData.field}</span>
