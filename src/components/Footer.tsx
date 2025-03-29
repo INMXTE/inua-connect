@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { GraduationCap, Mail, Link as LinkIcon } from 'lucide-react';
 
@@ -76,19 +75,6 @@ const Footer = () => {
         <div className="border-t border-gray-800 mt-12 pt-6 text-center text-gray-400 text-sm">
           <p>&copy; {new Date().getFullYear()} Inua Stude. All rights reserved.</p>
         </div>
-      </div>
-    </footer>
-  );
-};
-
-export default Footer;
-const Footer = () => {
-  return (
-    <footer className="border-t mt-auto">
-      <div className="container mx-auto px-4 py-6">
-        <p className="text-center text-sm text-gray-600">
-          © {new Date().getFullYear()} Your Company. All rights reserved.
-        </p>
       </div>
     </footer>
   );
