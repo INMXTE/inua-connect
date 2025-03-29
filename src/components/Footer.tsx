@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { GraduationCap, Mail, Link as LinkIcon } from 'lucide-react';
 
@@ -10,7 +9,7 @@ const Footer = () => {
           <div className="md:col-span-1">
             <Link to="/" className="flex items-center space-x-2 mb-4">
               <GraduationCap className="h-8 w-8 text-primary" />
-              <span className="font-bold text-xl text-white">Inua Stude</span>
+              <span className="font-bold text-xl text-white">Inua Stude Initiative</span>
             </Link>
             <p className="text-gray-400 text-sm">
               Empowering university students and recent graduates with career guidance, 
@@ -74,7 +73,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-gray-800 mt-12 pt-6 text-center text-gray-400 text-sm">
-          <p>&copy; {new Date().getFullYear()} Inua Stude. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Inua Stude Initiative. All rights reserved.</p>
         </div>
       </div>
     </footer>
