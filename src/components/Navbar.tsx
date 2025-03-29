@@ -1,10 +1,17 @@
-
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, GraduationCap, Settings, LogOut, LogIn, User } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/AuthContext';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  Menu,
+  X,
+  GraduationCap,
+  Settings,
+  LogOut,
+  LogIn,
+  User,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,7 +32,7 @@ const Navbar = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/');
+    navigate("/");
   };
 
   return (
@@ -34,40 +41,60 @@ const Navbar = () => {
         <div className="flex justify-between items-center">
           <Link to="/" className="flex items-center space-x-2">
             <GraduationCap className="h-8 w-8 text-primary" />
-            <span className="font-bold text-xl text-primary">Inua Stude</span>
+            <span className="font-bold text-xl text-primary">
+              Inua Stude Initiative
+            </span>
           </Link>
 
           {/* Desktop navigation */}
           <div className="hidden md:flex items-center space-x-6">
-            <Link to="/" className="text-gray-700 hover:text-primary font-medium">
+            <Link
+              to="/"
+              className="text-gray-700 hover:text-primary font-medium"
+            >
               Home
             </Link>
-            <Link to="/jobs" className="text-gray-700 hover:text-primary font-medium">
+            <Link
+              to="/jobs"
+              className="text-gray-700 hover:text-primary font-medium"
+            >
               Find Jobs
             </Link>
-            <Link to="/resources" className="text-gray-700 hover:text-primary font-medium">
+            <Link
+              to="/resources"
+              className="text-gray-700 hover:text-primary font-medium"
+            >
               Resources
             </Link>
-            
+
             {isAuthenticated ? (
               <>
-                <Link to="/profile" className="text-gray-700 hover:text-primary font-medium">
+                <Link
+                  to="/profile"
+                  className="text-gray-700 hover:text-primary font-medium"
+                >
                   My Profile
                 </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                    <Button
+                      variant="ghost"
+                      className="relative h-9 w-9 rounded-full"
+                    >
                       <User className="h-5 w-5" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate('/profile')}>
+                    <DropdownMenuItem onClick={() => navigate("/profile")}>
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/admin')} className="cursor-pointer">
+                    <DropdownMenuItem
+                      onClick={() => navigate("/admin")}
+                      className="cursor-pointer"
+                    >
                       <Settings className="mr-2 h-4 w-4" />
                       <span>Admin Dashboard</span>
                       <span>Admin</span>
@@ -97,7 +124,10 @@ const Navbar = () => {
 
           {/* Mobile menu button */}
           <div className="md:hidden">
-            <button onClick={toggleMenu} className="text-gray-700 focus:outline-none">
+            <button
+              onClick={toggleMenu}
+              className="text-gray-700 focus:outline-none"
+            >
               {isMenuOpen ? (
                 <X className="h-6 w-6" />
               ) : (
@@ -111,42 +141,42 @@ const Navbar = () => {
         <div
           className={cn(
             "md:hidden overflow-hidden transition-all duration-300 ease-in-out",
-            isMenuOpen ? "max-h-60 mt-4" : "max-h-0"
+            isMenuOpen ? "max-h-60 mt-4" : "max-h-0",
           )}
         >
           <div className="flex flex-col space-y-4 pb-4">
-            <Link 
+            <Link
               to="/"
               className="text-gray-700 hover:text-primary font-medium"
               onClick={() => setIsMenuOpen(false)}
             >
               Home
             </Link>
-            <Link 
+            <Link
               to="/jobs"
               className="text-gray-700 hover:text-primary font-medium"
               onClick={() => setIsMenuOpen(false)}
             >
               Find Jobs
             </Link>
-            <Link 
+            <Link
               to="/resources"
               className="text-gray-700 hover:text-primary font-medium"
               onClick={() => setIsMenuOpen(false)}
             >
               Resources
             </Link>
-            
+
             {isAuthenticated ? (
               <>
-                <Link 
+                <Link
                   to="/profile"
                   className="text-gray-700 hover:text-primary font-medium"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   My Profile
                 </Link>
-                <Link 
+                <Link
                   to="/admin"
                   className="text-gray-700 hover:text-primary font-medium flex items-center"
                   onClick={() => setIsMenuOpen(false)}
@@ -154,8 +184,8 @@ const Navbar = () => {
                   <Settings className="h-4 w-4 mr-1" />
                   Admin
                 </Link>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="flex items-center justify-start px-2"
                   onClick={() => {
                     handleSignOut();
@@ -168,19 +198,13 @@ const Navbar = () => {
               </>
             ) : (
               <>
-                <Link 
-                  to="/login"
-                  onClick={() => setIsMenuOpen(false)}
-                >
+                <Link to="/login" onClick={() => setIsMenuOpen(false)}>
                   <Button variant="outline" className="w-full">
                     <LogIn className="h-4 w-4 mr-2" />
                     Log In
                   </Button>
                 </Link>
-                <Link 
-                  to="/signup" 
-                  onClick={() => setIsMenuOpen(false)}
-                >
+                <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
                   <Button className="w-full">Sign Up</Button>
                 </Link>
               </>
