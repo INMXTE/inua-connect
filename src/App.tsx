@@ -12,6 +12,7 @@ import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import Admin from "./pages/Admin";
 import AdminResources from "./pages/AdminResources";
+import ManageJobs from "./pages/ManageJobs";
 import NotFound from "./pages/NotFound";
 import RequireAuth from "./components/RequireAuth";
 import { Provider } from 'react-redux';
@@ -48,6 +49,11 @@ const App = () => (
               <Route path="/admin/resources" element={
                 <RequireAuth requireAdmin>
                   <AdminResources />
+                </RequireAuth>
+              } />
+              <Route path="/admin/jobs" element={
+                <RequireAuth requireAdmin>
+                  <ManageJobs />
                 </RequireAuth>
               } />
 
