@@ -69,12 +69,6 @@ const Navbar = () => {
 
             {isAuthenticated ? (
               <>
-                <Link
-                  to="/profile"
-                  className="text-gray-700 hover:text-primary font-medium"
-                >
-                  My Profile
-                </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
