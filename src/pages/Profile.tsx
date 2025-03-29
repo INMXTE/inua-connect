@@ -1,25 +1,39 @@
 import { useState } from 'react';
-import { Mail, User, GraduationCap, FileText } from 'lucide-react'; // Added FileText import
+import { Mail, User, GraduationCap, FileText, Upload, Phone, MapPin, Globe, Briefcase } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import JobCard from '@/components/JobCard';
+import ResourceCard from '@/components/ResourceCard'; // Added import for ResourceCard
 import type { JobProps } from '@/components/JobCard';
 import type { ResourceProps } from '@/components/ResourceCard';
-import JobCard from '@/components/JobCard'; // Added import for JobCard
-import ResourceCard from '@/components/ResourceCard'; // Added import for ResourceCard
 
 
 const Profile = () => {
+  const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
-  const [profileCompletion] = useState(75);
+  const [cv, setCV] = useState<File | null>(null);
 
-  // Sample profile data
+  const handleCVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setCV(e.target.files[0]);
+      toast({
+        title: "CV uploaded successfully",
+        description: `File: ${e.target.files[0].name}`,
+      });
+    }
+  };
+
+  // Sample profile data (from original code)
   const profileData = {
     name: "James Mwangi",
     email: "james.mwangi@example.com",
@@ -55,134 +69,107 @@ const Profile = () => {
     }
   ];
 
-  const handleEditProfile = () => {
-    toast({
-      title: "Edit Profile",
-      description: "Profile editing would open here. This feature is under development.",
-    });
-  };
-
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen">
       <Navbar />
 
-      <main className="flex-grow bg-gray-50 py-10">
-        <div className="container mx-auto px-4">
-          <div className="mb-10">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-                  <div className="bg-primary/10 rounded-full p-4">
-                    <User className="h-16 w-16 text-primary" />
-                  </div>
-
-                  <div className="flex-grow">
-                    <h1 className="text-2xl font-bold mb-1">{profileData.name}</h1>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-gray-600 mb-4">
-                      <div className="flex items-center">
-                        <GraduationCap className="h-4 w-4 mr-1" />
-                        <span>{profileData.university}, {profileData.field}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <Mail className="h-4 w-4 mr-1" />
-                        <span>{profileData.email}</span>
-                      </div>
-                    </div>
-
-                    <div className="mb-4">
-                      <p className="text-sm text-gray-500 mb-1">Profile Completion: {profileCompletion}%</p>
-                      <Progress value={profileCompletion} className="h-2" />
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {profileData.skills.map((skill, index) => (
-                        <Badge key={index} variant="secondary" className="font-normal">
-                          {skill}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <Button onClick={handleEditProfile}>Edit Profile</Button>
-                  </div>
+      <main className="container mx-auto px-4 py-8">
+        <Card className="mb-8">
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-2xl">My Profile</CardTitle>
+              <Button onClick={() => setIsEditing(!isEditing)}>
+                {isEditing ? 'Save Changes' : 'Edit Profile'}
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <Label>Full Name</Label>
+                  <Input value={profileData.name} disabled={!isEditing} />
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Tabs defaultValue="overview" className="space-y-8">
-            <TabsList className="mx-auto">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="saved-jobs">Saved Jobs</TabsTrigger>
-              <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
-              <TabsTrigger value="applications">Applications</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="overview">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> {/* Adjusted grid for better layout */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Education & Experience</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="border-l-2 border-primary/30 pl-4 mb-4">
-                      <h4 className="font-medium">BSc in Computer Science</h4>
-                      <p className="text-sm text-gray-600">University of Nairobi | Expected: 2024</p>
-                      <p className="mt-1 text-sm">Relevant coursework: Data Structures, Algorithms, Web Development</p>
-                    </div>
-                    <div className="border-l-2 border-primary/30 pl-4"> {/*Experience section added back */}
-                      <div className="mb-4">
-                        <h4 className="font-medium">Student Developer</h4>
-                        <p className="text-sm text-gray-600">University IT Department | Jun 2023 - Present</p>
-                        <p className="mt-1 text-sm">
-                          Assisted in maintaining university web applications and developing new features.
-                        </p>
-                      </div>
-                      <div>
-                        <h4 className="font-medium">Volunteer Web Developer</h4>
-                        <p className="text-sm text-gray-600">Local NGO | Jan 2023 - Apr 2023</p>
-                        <p className="mt-1 text-sm">
-                          Built and maintained website for a local non-profit organization.
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Interests</CardTitle>
-                    <CardDescription>Areas you're interested in exploring</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2">
-                      {profileData.interests.map((interest, index) => (
-                        <li key={index} className="flex items-center">
-                          <div className="h-2 w-2 rounded-full bg-primary mr-2"></div>
-                          {interest}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
+                <div>
+                  <Label>Email</Label>
+                  <Input type="email" value={profileData.email} disabled={!isEditing} />
+                </div>
+                <div>
+                  <Label>Phone</Label>
+                  <Input type="tel" placeholder="+1234567890" disabled={!isEditing} />
+                </div>
+                <div>
+                  <Label>Location</Label>
+                  <Input placeholder="City, Country" disabled={!isEditing} />
+                </div>
               </div>
-              <div className="flex justify-center mt-6"> {/* Added back download CV button */}
-                <Button variant="outline" className="flex items-center">
-                  <FileText className="mr-2 h-4 w-4" />
-                  Download CV
-                </Button>
+              <div className="space-y-4">
+                <div>
+                  <Label>Education Level</Label>
+                  <Input value={profileData.university} disabled={!isEditing} />
+                </div>
+                <div>
+                  <Label>Field of Study</Label>
+                  <Input value={profileData.field} disabled={!isEditing} />
+                </div>
+                <div>
+                  <Label>Current Role</Label>
+                  <Input placeholder="Software Developer" disabled={!isEditing} />
+                </div>
+                <div>
+                  <Label>Years of Experience</Label>
+                  <Input type="number" placeholder="2" disabled={!isEditing} />
+                </div>
               </div>
-            </TabsContent>
+            </div>
 
-            <TabsContent value="saved-jobs">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {savedJobs.map(job => (
-                  <JobCard key={job.id} job={job} />
-                ))}
-              </div>
+            <div>
+              <Label>Bio</Label>
+              <Textarea placeholder="Tell us about yourself..." disabled={!isEditing} className="h-32" />
+            </div>
 
-              {savedJobs.length === 0 && (
+            <div>
+              <Label>Skills</Label>
+              <Input value={profileData.skills.join(', ')} disabled={!isEditing} />
+            </div>
+
+            <div className="flex items-center gap-4">
+              <Button asChild className="w-full md:w-auto">
+                <label>
+                  <Upload className="mr-2 h-4 w-4" />
+                  Upload CV
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept=".pdf,.doc,.docx"
+                    onChange={handleCVUpload}
+                  />
+                </label>
+              </Button>
+              {cv && <span className="text-sm text-muted-foreground">{cv.name}</span>}
+            </div>
+
+            <div>
+              <Label>Profile Completion</Label>
+              <Progress value={75} className="mt-2" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Tabs defaultValue="saved-jobs" className="space-y-8">
+          <TabsList className="mx-auto">
+            <TabsTrigger value="saved-jobs">Saved Jobs</TabsTrigger>
+            <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
+            <TabsTrigger value="applications">Applications</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="saved-jobs">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {savedJobs.map(job => (
+                <JobCard key={job.id} job={job} />
+              ))}
+            </div>
+            {savedJobs.length === 0 && (
                 <div className="text-center py-12">
                   <h3 className="text-xl font-semibold mb-2">No saved jobs yet</h3>
                   <p className="text-gray-600 mb-4">
@@ -193,29 +180,28 @@ const Profile = () => {
                   </Button>
                 </div>
               )}
-            </TabsContent>
+          </TabsContent>
 
-            <TabsContent value="recommendations">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {recommendedResources.map(resource => (
-                  <ResourceCard key={resource.id} resource={resource} />
-                ))}
-              </div>
-            </TabsContent>
+          <TabsContent value="recommendations">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {recommendedResources.map(resource => (
+                <ResourceCard key={resource.id} resource={resource} />
+              ))}
+            </div>
+          </TabsContent>
 
-            <TabsContent value="applications">
-              <div className="text-center py-12">
-                <h3 className="text-xl font-semibold mb-2">No active applications</h3>
-                <p className="text-gray-600 mb-4">
-                  When you apply for opportunities, they will appear here for easy tracking.
-                </p>
-                <Button asChild>
-                  <Link href="/jobs">Find Opportunities</Link>
-                </Button>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
+          <TabsContent value="applications">
+            <div className="text-center py-12">
+              <h3 className="text-xl font-semibold mb-2">No active applications</h3>
+              <p className="text-gray-600 mb-4">
+                When you apply for opportunities, they will appear here for easy tracking.
+              </p>
+              <Button asChild>
+                <Link href="/jobs">Find Opportunities</Link>
+              </Button>
+            </div>
+          </TabsContent>
+        </Tabs>
       </main>
 
       <Footer />

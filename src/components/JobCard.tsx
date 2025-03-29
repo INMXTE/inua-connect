@@ -43,7 +43,7 @@ const JobCard = ({ job, compact = false, onSave, isSaved = false }: JobCardProps
   };
   
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="overflow-hidden">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div>
@@ -55,7 +55,7 @@ const JobCard = ({ job, compact = false, onSave, isSaved = false }: JobCardProps
               variant="ghost" 
               size="icon"
               onClick={handleSave}
-              className="text-muted-foreground hover:text-primary"
+              className={`text-muted-foreground hover:text-primary ${saved ? 'text-primary' : ''}`}
             >
               {saved ? <BookmarkCheck className="h-5 w-5" /> : <Bookmark className="h-5 w-5" />}
             </Button>
