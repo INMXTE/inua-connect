@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import { Mail, User, GraduationCap, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
@@ -13,6 +13,7 @@ import type { JobProps } from '@/components/JobCard';
 import type { ResourceProps } from '@/components/ResourceCard';
 import JobCard from '@/components/JobCard';
 import ResourceCard from '@/components/ResourceCard';
+import { Input } from "@/components/ui/input";
 
 
 const Profile = () => {
