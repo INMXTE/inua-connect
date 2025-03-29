@@ -155,14 +155,18 @@ const Admin = () => {
                         <h3 className="font-semibold">Job Listings</h3>
                         <p className="text-sm text-gray-500">Manage job postings</p>
                       </div>
-                      <Button>Manage Jobs</Button>
+                      <Button asChild>
+                        <Link to="/admin/jobs">Manage Jobs</Link>
+                      </Button>
                     </div>
                     <div className="flex justify-between items-center border-b pb-4">
                       <div>
                         <h3 className="font-semibold">Resources</h3>
                         <p className="text-sm text-gray-500">Update learning resources</p>
                       </div>
-                      <Button>Manage Resources</Button>
+                      <Button asChild>
+                        <Link to="/admin/resources">Manage Resources</Link>
+                      </Button>
                     </div>
                   </div>
                 </CardContent>

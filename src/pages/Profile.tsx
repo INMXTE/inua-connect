@@ -20,14 +20,33 @@ const Profile = () => {
   const [profileCompletion] = useState(75);
 
   // Sample profile data
-  const profileData = {
+  const [profileData, setProfileData] = useState({
     name: "James Mwangi",
     email: "james.mwangi@example.com",
+    phone: "+254 123 456 789",
     university: "University of Nairobi",
     field: "Computer Science",
     graduationYear: "2024",
     skills: ["JavaScript", "React", "Python", "Data Analysis", "UI/UX Design"],
-    interests: ["Software Development", "AI/Machine Learning", "Web Design"]
+    interests: ["Software Development", "AI/Machine Learning", "Web Design"],
+    linkedIn: "https://linkedin.com/in/jamesmwangi",
+    github: "https://github.com/jamesmwangi",
+    portfolio: "https://jamesmwangi.dev",
+    cvUrl: null as string | null,
+  });
+
+  const handleCVUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Here you would typically upload to your storage solution
+      // For now, we'll just create an object URL
+      const url = URL.createObjectURL(file);
+      setProfileData(prev => ({ ...prev, cvUrl: url }));
+      toast({
+        title: "CV Uploaded",
+        description: "Your CV has been successfully uploaded.",
+      });
+    }
   };
 
   const savedJobs: JobProps[] = [
@@ -60,6 +79,12 @@ const Profile = () => {
       title: "Edit Profile",
       description: "Profile editing would open here. This feature is under development.",
     });
+  };
+
+  const handleDownloadCV = () => {
+    if (profileData.cvUrl) {
+      window.open(profileData.cvUrl, '_blank');
+    }
   };
 
   return (
@@ -104,7 +129,28 @@ const Profile = () => {
                   </div>
 
                   <div>
-                    <Button onClick={handleEditProfile}>Edit Profile</Button>
+                    <div className="flex gap-2">
+                      <Button onClick={handleEditProfile}>Edit Profile</Button>
+                      <div className="relative">
+                        <input
+                          type="file"
+                          id="cv-upload"
+                          className="hidden"
+                          accept=".pdf,.doc,.docx"
+                          onChange={handleCVUpload}
+                        />
+                        <Button asChild>
+                          <label htmlFor="cv-upload" className="cursor-pointer">
+                            Upload CV
+                          </label>
+                        </Button>
+                      </div>
+                      {profileData.cvUrl && (
+                        <Button variant="outline" onClick={handleDownloadCV}>
+                          Download CV
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </CardContent>
