@@ -90,7 +90,6 @@ const Navbar = () => {
                       className="cursor-pointer"
                     >
                       <Settings className="mr-2 h-4 w-4" />
-                      <span>Admin Dashboard</span>
                       <span>Admin</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -168,14 +167,13 @@ const Navbar = () => {
                   className="text-gray-700 hover:text-primary font-medium"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  My Profile
+                  Profile
                 </Link>
                 <Link
                   to="/admin"
                   className="text-gray-700 hover:text-primary font-medium flex items-center"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <Settings className="h-4 w-4 mr-1" />
                   Admin
                 </Link>
                 <Button
