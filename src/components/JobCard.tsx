@@ -1,109 +1,111 @@
 
-import { useState } from 'react';
-import { Bookmark, BookmarkCheck, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { useDispatch, useSelector } from 'react-redux';
-import { toggleSavedJob } from '@/store/jobsSlice';
-import { RootState } from '@/store';
-
-export type JobType = 'Full-time' | 'Part-time' | 'Internship' | 'Apprenticeship';
-
-export interface JobProps {
-  id: string;
-  title: string;
-  company: string;
-  location: string;
-  type: JobType;
-  salary?: string;
-  posted: string;
-  skills: string[];
-  description: string;
-}
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Briefcase, MapPin, Calendar, ExternalLink } from "lucide-react";
 
 interface JobCardProps {
-  job: JobProps;
-  compact?: boolean;
+  id: string;
+  title: string;
+  company?: string;
+  location?: string;
+  type?: string;
+  category?: string;
+  description: string;
+  postedDate?: string;
+  applicationUrl?: string;
 }
 
-const JobCard = ({ job, compact = false }: JobCardProps) => {
-  const [expanded, setExpanded] = useState(false);
-  const dispatch = useDispatch();
-  const savedJobs = useSelector((state: RootState) => state.jobs.savedJobs);
-  const isSaved = savedJobs.some(savedJob => savedJob.id === job.id);
-  
-  const toggleExpand = () => {
-    setExpanded(prev => !prev);
-  };
+const JobCard: React.FC<JobCardProps> = ({
+  id,
+  title,
+  company = "Company Name",
+  location = "Remote",
+  type = "Full-time",
+  category = "Technology",
+  description,
+  postedDate = "Posted 7 days ago",
+  applicationUrl = "#",
+}) => {
+  const [showDetails, setShowDetails] = useState(false);
 
-  const handleSaveToggle = () => {
-    dispatch(toggleSavedJob(job));
-  };
-  
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="h-full flex flex-col">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div>
-            <CardTitle className="text-xl">{job.title}</CardTitle>
-            <div className="text-muted-foreground">{job.company} • {job.location}</div>
+            <CardTitle className="text-xl">{title}</CardTitle>
+            <CardDescription className="text-sm mt-1">{company}</CardDescription>
           </div>
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleSaveToggle}
-              className="h-8 w-8"
-            >
-              {isSaved ? (
-                <BookmarkCheck className="h-5 w-5 text-primary" />
-              ) : (
-                <Bookmark className="h-5 w-5" />
-              )}
-            </Button>
-            <Badge variant={job.type === 'Internship' ? 'outline' : 'default'}>
-              {job.type}
-            </Badge>
-          </div>
+          <Badge variant="outline" className="bg-blue-50 text-blue-700 hover:bg-blue-100">
+            {type}
+          </Badge>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="flex items-center text-sm text-muted-foreground gap-4 mb-4">
-          {job.salary && (
-            <div className="flex items-center">
-              <span className="mr-1">💰</span> {job.salary}
-            </div>
-          )}
+      <CardContent className="flex-grow">
+        <div className="flex flex-col space-y-2 text-sm text-muted-foreground mb-4">
           <div className="flex items-center">
-            <span className="mr-1">📅</span> Posted {job.posted}
+            <MapPin className="h-4 w-4 mr-2" />
+            <span>{location}</span>
+          </div>
+          <div className="flex items-center">
+            <Briefcase className="h-4 w-4 mr-2" />
+            <span>{category}</span>
+          </div>
+          <div className="flex items-center">
+            <Calendar className="h-4 w-4 mr-2" />
+            <span>{postedDate}</span>
           </div>
         </div>
-        
-        <p className="text-sm text-gray-600 mb-4">
-          {expanded ? job.description : `${job.description.slice(0, 150)}...`}
-        </p>
-        
-        <div className="flex flex-wrap gap-2 mt-2">
-          {job.skills.map((skill, index) => (
-            <Badge key={index} variant="secondary" className="font-normal">
-              {skill}
-            </Badge>
-          ))}
-        </div>
+        <p className="text-sm line-clamp-3">{description}</p>
       </CardContent>
-      <CardFooter>
-        <Button
-          variant="outline"
-          onClick={toggleExpand}
-          className="w-full flex items-center justify-center gap-2"
-        >
-          {expanded ? (
-            <>Show Less <ChevronUp className="h-4 w-4" /></>
-          ) : (
-            <>View Details <ChevronDown className="h-4 w-4" /></>
-          )}
-        </Button>
+      <CardFooter className="pt-2 flex justify-between">
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline">View Details</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>{title}</DialogTitle>
+              <DialogDescription className="flex flex-col gap-1 pt-2">
+                <span className="font-medium text-foreground">{company}</span>
+                <div className="flex items-center text-sm">
+                  <MapPin className="h-4 w-4 mr-1" />
+                  <span>{location}</span>
+                </div>
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-wrap gap-2 mb-4">
+              <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                {type}
+              </Badge>
+              <Badge variant="outline" className="bg-gray-50">
+                {category}
+              </Badge>
+              <Badge variant="outline" className="bg-gray-50">
+                {postedDate}
+              </Badge>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-medium mb-2">Job Description</h4>
+                <p className="text-sm">{description}</p>
+              </div>
+            </div>
+            <DialogFooter className="mt-4">
+              <Button 
+                className="w-full flex items-center gap-2"
+                onClick={() => window.open(applicationUrl, '_blank')}
+              >
+                Apply for Position
+                <ExternalLink className="h-4 w-4" />
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardFooter>
     </Card>
   );

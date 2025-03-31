@@ -1,210 +1,218 @@
-import { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  Menu,
-  X,
-  GraduationCap,
-  Settings,
-  LogOut,
-  LogIn,
-  User,
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { supabase } from "@/integrations/supabase/client";
+import { useMobile } from "@/hooks/use-mobile";
+import { User, ChevronDown, Menu, X, Home, Briefcase, BookOpen, LayoutDashboard, FilePlus, UserCircle, LogOut } from "lucide-react";
 
-const Navbar = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { isAuthenticated, signOut, user } = useAuth();
+interface NavbarProps {
+  userRole?: string | null;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ userRole }) => {
+  const [user, setUser] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isMobile = useMobile();
   const navigate = useNavigate();
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      setUser(data.user);
+    };
 
-  const handleSignOut = async () => {
-    await signOut();
+    fetchUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     navigate("/");
   };
 
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const getNavigationLinks = () => {
+    if (userRole === "admin") {
+      return [
+        { label: "Dashboard", href: "/admin", icon: <LayoutDashboard className="h-4 w-4 mr-2" /> },
+        { label: "Manage Jobs", href: "/manage-jobs", icon: <Briefcase className="h-4 w-4 mr-2" /> },
+        { label: "Manage Resources", href: "/manage-resources", icon: <BookOpen className="h-4 w-4 mr-2" /> },
+        { label: "Manage Partners", href: "/manage-partners", icon: <FilePlus className="h-4 w-4 mr-2" /> },
+      ];
+    } else if (userRole === "employer") {
+      return [
+        { label: "Dashboard", href: "/employer/dashboard", icon: <LayoutDashboard className="h-4 w-4 mr-2" /> },
+        { label: "Content Management", href: "/employer/content", icon: <FilePlus className="h-4 w-4 mr-2" /> },
+      ];
+    } else {
+      return [
+        { label: "Home", href: "/", icon: <Home className="h-4 w-4 mr-2" /> },
+        { label: "Find Jobs", href: "/jobs", icon: <Briefcase className="h-4 w-4 mr-2" /> },
+        { label: "Resources", href: "/resources", icon: <BookOpen className="h-4 w-4 mr-2" /> },
+      ];
+    }
+  };
+
+  const navigationLinks = getNavigationLinks();
+
   return (
-    <nav className="bg-white shadow-sm py-4 sticky top-0 z-50">
-      <div className="container mx-auto px-4 md:px-6">
-        <div className="flex justify-between items-center">
-          <Link to="/" className="flex items-center space-x-2">
-            <GraduationCap className="h-8 w-8 text-primary" />
-            <span className="font-bold text-xl text-primary">
-              Inua Stude Initiative
-            </span>
+    <header className="sticky top-0 z-40 w-full bg-white border-b">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+        <div className="flex items-center gap-6">
+          <Link to="/" className="flex items-center">
+            <span className="text-xl font-bold text-blue-600">Inua Stude</span>
           </Link>
 
-          {/* Desktop navigation */}
-          <div className="hidden md:flex items-center space-x-6">
-            <Link
-              to="/"
-              className="text-gray-700 hover:text-primary font-medium"
-            >
-              Home
-            </Link>
-            <Link
-              to="/jobs"
-              className="text-gray-700 hover:text-primary font-medium"
-            >
-              Find Jobs
-            </Link>
-            <Link
-              to="/resources"
-              className="text-gray-700 hover:text-primary font-medium"
-            >
-              Resources
-            </Link>
-
-            {isAuthenticated ? (
-              <>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="relative h-9 w-9 rounded-full"
-                    >
-                      <User className="h-5 w-5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate("/profile")}>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => navigate("/admin")}
-                      className="cursor-pointer"
-                    >
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Admin</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleSignOut}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
-            ) : (
-              <>
-                <Link to="/login">
-                  <Button variant="outline" className="mr-2">
-                    <LogIn className="mr-2 h-4 w-4" />
-                    Log In
-                  </Button>
+          {!isMobile && (
+            <nav className="ml-4 flex items-center space-x-4">
+              {navigationLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                >
+                  {link.label}
                 </Link>
-                <Link to="/signup">
-                  <Button>Sign Up</Button>
-                </Link>
-              </>
-            )}
-          </div>
+              ))}
+            </nav>
+          )}
+        </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <button
-              onClick={toggleMenu}
-              className="text-gray-700 focus:outline-none"
-            >
-              {isMenuOpen ? (
+        <div className="flex items-center">
+          {isMobile ? (
+            <Button variant="ghost" size="icon" onClick={toggleMobileMenu}>
+              {mobileMenuOpen ? (
                 <X className="h-6 w-6" />
               ) : (
                 <Menu className="h-6 w-6" />
               )}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile navigation */}
-        <div
-          className={cn(
-            "md:hidden overflow-hidden transition-all duration-300 ease-in-out",
-            isMenuOpen ? "max-h-60 mt-4" : "max-h-0",
-          )}
-        >
-          <div className="flex flex-col space-y-4 pb-4">
-            <Link
-              to="/"
-              className="text-gray-700 hover:text-primary font-medium"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Home
-            </Link>
-            <Link
-              to="/jobs"
-              className="text-gray-700 hover:text-primary font-medium"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Find Jobs
-            </Link>
-            <Link
-              to="/resources"
-              className="text-gray-700 hover:text-primary font-medium"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Resources
-            </Link>
-
-            {isAuthenticated ? (
-              <>
-                <Link
-                  to="/profile"
-                  className="text-gray-700 hover:text-primary font-medium"
-                  onClick={() => setIsMenuOpen(false)}
+            </Button>
+          ) : user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  className="flex items-center gap-2 px-2 py-1 hover:bg-gray-100 focus:ring-0"
                 >
-                  Profile
-                </Link>
-                <Link
-                  to="/admin"
-                  className="text-gray-700 hover:text-primary font-medium flex items-center"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Admin
-                </Link>
-                <Button
-                  variant="outline"
-                  className="flex items-center justify-start px-2"
-                  onClick={() => {
-                    handleSignOut();
-                    setIsMenuOpen(false);
-                  }}
-                >
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Log Out
+                  <UserCircle className="h-5 w-5" />
+                  <span className="text-sm font-medium">
+                    {user?.email?.split("@")[0] || "Account"}
+                  </span>
+                  <ChevronDown className="h-4 w-4 opacity-50" />
                 </Button>
-              </>
-            ) : (
-              <>
-                <Link to="/login" onClick={() => setIsMenuOpen(false)}>
-                  <Button variant="outline" className="w-full">
-                    <LogIn className="h-4 w-4 mr-2" />
-                    Log In
-                  </Button>
-                </Link>
-                <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
-                  <Button className="w-full">Sign Up</Button>
-                </Link>
-              </>
-            )}
-          </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem onClick={() => navigate("/profile")}>
+                  <UserCircle className="h-4 w-4 mr-2" />
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" asChild>
+                <Link to="/login">Login</Link>
+              </Button>
+              <Button asChild>
+                <Link to="/signup">Sign Up</Link>
+              </Button>
+            </div>
+          )}
         </div>
       </div>
-    </nav>
+
+      {/* Mobile menu */}
+      {isMobile && mobileMenuOpen && (
+        <div className="fixed inset-0 top-16 z-50 bg-white pb-20 shadow-xl animate-in slide-in-from-top-5">
+          <div className="container mx-auto px-4 pt-4">
+            <nav className="flex flex-col space-y-4">
+              {navigationLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  className="flex items-center py-2 text-base font-medium text-gray-900 hover:text-blue-600"
+                  onClick={toggleMobileMenu}
+                >
+                  {link.icon}
+                  {link.label}
+                </Link>
+              ))}
+              
+              {user && (
+                <>
+                  <div className="h-px bg-gray-200 my-2" />
+                  
+                  <Link
+                    to="/profile"
+                    className="flex items-center py-2 text-base font-medium text-gray-900 hover:text-blue-600"
+                    onClick={toggleMobileMenu}
+                  >
+                    <UserCircle className="h-4 w-4 mr-2" />
+                    Profile
+                  </Link>
+                  
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      toggleMobileMenu();
+                    }}
+                    className="flex items-center py-2 text-base font-medium text-gray-900 hover:text-blue-600"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </button>
+                </>
+              )}
+              
+              {!user && (
+                <>
+                  <div className="h-px bg-gray-200 my-2" />
+                  
+                  <Link
+                    to="/login"
+                    className="flex items-center py-2 text-base font-medium text-gray-900 hover:text-blue-600"
+                    onClick={toggleMobileMenu}
+                  >
+                    Login
+                  </Link>
+                  
+                  <Link
+                    to="/signup"
+                    className="flex items-center py-2 text-base font-medium text-blue-600"
+                    onClick={toggleMobileMenu}
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
+            </nav>
+          </div>
+        </div>
+      )}
+    </header>
   );
 };
 

@@ -1,238 +1,257 @@
 
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import Navbar from "@/components/Navbar";
-import { Input } from "@/components/ui/input";
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import RequireAuth from "@/components/RequireAuth";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import { toast } from "@/components/ui/use-toast";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
-
-const ADMIN_PASSWORD = "admin123"; // In a real application, this would be stored securely
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+import { supabase } from "@/integrations/supabase/client";
+import { Users, Briefcase, Book, Building2 } from "lucide-react";
 
 const Admin = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [activeTab, setActiveTab] = useState("dashboard");
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalJobs: 0,
+    totalResources: 0,
+    totalPartners: 0,
+    applications: 0,
+  });
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      toast({
-        title: "Login successful",
-        description: "Welcome to the admin dashboard",
-      });
-    } else {
-      toast({
-        title: "Login failed",
-        description: "Incorrect password",
-        variant: "destructive",
-      });
-    }
-  };
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-grow flex items-center justify-center p-4">
-          <Card className="w-full max-w-md">
-            <form onSubmit={handleLogin}>
-              <CardHeader>
-                <CardTitle>Admin Login</CardTitle>
-                <CardDescription>
-                  Enter your password to access the admin dashboard
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="relative">
-                  <Label htmlFor="password">Password</Label>
-                  <div className="flex mt-1">
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pr-10"
-                    />
-                    <button
-                      type="button"
-                      className="absolute right-2 top-[32px]"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4 text-gray-500" />
-                      ) : (
-                        <Eye className="h-4 w-4 text-gray-500" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-                <Button type="submit" className="w-full mt-4">
-                  Login
-                </Button>
-              </CardContent>
-            </form>
-          </Card>
-        </main>
-      </div>
-    );
-  }
+  const [activityData, setActivityData] = useState([]);
+  const [jobData, setJobData] = useState([]);
+  
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        // Fetch users count
+        const { count: usersCount, error: usersError } = await supabase
+          .from('profiles')
+          .select('id', { count: 'exact' });
+          
+        // Fetch jobs count
+        const { count: jobsCount, error: jobsError } = await supabase
+          .from('job_postings')
+          .select('id', { count: 'exact' });
+          
+        // Fetch resources count  
+        const { count: resourcesCount, error: resourcesError } = await supabase
+          .from('resources')
+          .select('id', { count: 'exact' });
+          
+        // Fetch partners count (assuming partners table exists)
+        const { count: partnersCount, error: partnersError } = await supabase
+          .from('partners')
+          .select('id', { count: 'exact', head: true });
+          
+        // Fetch applications count
+        const { count: applicationsCount, error: applicationsError } = await supabase
+          .from('job_applications')
+          .select('id', { count: 'exact' });
+          
+        setStats({
+          totalUsers: usersCount || 0,
+          totalJobs: jobsCount || 0,
+          totalResources: resourcesCount || 0,
+          totalPartners: partnersCount || 0,
+          applications: applicationsCount || 0,
+        });
+        
+        // Generate sample activity data
+        const currentDate = new Date();
+        const activityData = [];
+        
+        for (let i = 6; i >= 0; i--) {
+          const date = new Date();
+          date.setDate(currentDate.getDate() - i);
+          
+          activityData.push({
+            date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            users: Math.floor(Math.random() * 10),
+            resources: Math.floor(Math.random() * 5),
+            jobs: Math.floor(Math.random() * 7),
+          });
+        }
+        
+        setActivityData(activityData);
+        
+        // Generate sample job data
+        const jobData = [
+          { name: "Technology", jobs: 12 },
+          { name: "Marketing", jobs: 8 },
+          { name: "Finance", jobs: 5 },
+          { name: "Design", jobs: 7 },
+          { name: "Sales", jobs: 9 },
+        ];
+        
+        setJobData(jobData);
+        
+      } catch (error) {
+        console.error("Error fetching admin stats:", error);
+      }
+    };
+    
+    fetchStats();
+  }, []);
 
   return (
-    <RequireAuth requireAdmin>
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <div className="bg-primary text-white py-6">
-          <div className="container mx-auto px-4">
-            <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-            <p>Manage your site content and settings</p>
-          </div>
-        </div>
-        <main className="flex-grow container mx-auto p-4">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-              <TabsTrigger value="content">Content</TabsTrigger>
-              <TabsTrigger value="users">Users</TabsTrigger>
-              <TabsTrigger value="settings">Settings</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="dashboard">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Overview</CardTitle>
-                  <CardDescription>Your site statistics</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="p-4 border rounded-lg">
-                      <h3 className="font-semibold">Total Users</h3>
-                      <p className="text-2xl">1,234</p>
-                    </div>
-                    <div className="p-4 border rounded-lg">
-                      <h3 className="font-semibold">Active Jobs</h3>
-                      <p className="text-2xl">56</p>
-                    </div>
-                    <div className="p-4 border rounded-lg">
-                      <h3 className="font-semibold">Resources</h3>
-                      <p className="text-2xl">89</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="content">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Content Management</CardTitle>
-                  <CardDescription>Manage your site content</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center border-b pb-4">
-                      <div>
-                        <h3 className="font-semibold">Job Listings</h3>
-                        <p className="text-sm text-gray-500">Manage job postings</p>
-                      </div>
-                      <Button asChild>
-                        <Link to="/admin/jobs">Manage Jobs</Link>
-                      </Button>
-                    </div>
-                    <div className="flex justify-between items-center border-b pb-4">
-                      <div>
-                        <h3 className="font-semibold">Resources</h3>
-                        <p className="text-sm text-gray-500">Update learning resources</p>
-                      </div>
-                      <Button asChild>
-                        <Link to="/admin/resources">Manage Resources</Link>
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="users">
-              <Card>
-                <CardHeader>
-                  <CardTitle>User Management</CardTitle>
-                  <CardDescription>Manage user accounts</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-2">
-                      <Input placeholder="Search users..." />
-                      <Button>Search</Button>
-                    </div>
-                    <div className="border rounded-lg p-4">
-                      <p className="text-center text-gray-500">User list will appear here</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="settings">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Site Settings</CardTitle>
-                  <CardDescription>Manage admin settings</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="admin-password">Change Admin Password</Label>
-                      <div className="flex gap-2 mt-1">
-                        <Input type="password" id="admin-password" placeholder="New password" />
-                        <Button>Update</Button>
-                      </div>
-                    </div>
-                    <div className="pt-4">
-                      <Label>Site Moderation</Label>
-                      <div className="mt-2 space-y-2">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox id="moderate-comments" />
-                          <label htmlFor="moderate-comments">
-                            Enable comment moderation
-                          </label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox id="require-approval" />
-                          <label htmlFor="require-approval">
-                            Require job posting approval
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </main>
+    <div className="container mx-auto py-8 px-4">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
       </div>
-    </RequireAuth>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Users</p>
+                <h3 className="text-2xl font-bold">{stats.totalUsers}</h3>
+              </div>
+              <div className="p-2 bg-blue-100 rounded-full">
+                <Users className="h-6 w-6 text-blue-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Job Postings</p>
+                <h3 className="text-2xl font-bold">{stats.totalJobs}</h3>
+              </div>
+              <div className="p-2 bg-green-100 rounded-full">
+                <Briefcase className="h-6 w-6 text-green-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Resources</p>
+                <h3 className="text-2xl font-bold">{stats.totalResources}</h3>
+              </div>
+              <div className="p-2 bg-purple-100 rounded-full">
+                <Book className="h-6 w-6 text-purple-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Partners</p>
+                <h3 className="text-2xl font-bold">{stats.totalPartners}</h3>
+              </div>
+              <div className="p-2 bg-amber-100 rounded-full">
+                <Building2 className="h-6 w-6 text-amber-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>Platform Activity</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={activityData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="users" stroke="#3b82f6" strokeWidth={2} />
+                <Line type="monotone" dataKey="resources" stroke="#8b5cf6" strokeWidth={2} />
+                <Line type="monotone" dataKey="jobs" stroke="#10b981" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Jobs by Category</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={jobData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="jobs" fill="#3b82f6" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Manage Resources</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              Add, edit or remove resources for students.
+            </p>
+            <Link to="/admin/resources">
+              <Button className="w-full">Manage Resources</Button>
+            </Link>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Manage Jobs</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              Add, edit or remove job postings.
+            </p>
+            <Link to="/manage-jobs">
+              <Button className="w-full">Manage Jobs</Button>
+            </Link>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Manage Partners</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              Add, edit or remove partner organizations.
+            </p>
+            <Link to="/manage-partners">
+              <Button className="w-full">Manage Partners</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
 
