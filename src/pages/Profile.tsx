@@ -135,12 +135,16 @@ const Profile = () => {
           };
           
           setProfile(profileData);
-          dispatch(updateProfile(profileData));
+          dispatch(updateProfile(profileData as ExtendedProfile));
         }
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
-      toast.error('Failed to load profile');
+      toast({
+        title: 'Error',
+        description: 'Failed to load profile',
+        variant: 'destructive'
+      });
     } finally {
       setLoading(false);
     }

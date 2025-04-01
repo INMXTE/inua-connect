@@ -95,7 +95,11 @@ const EmployerContent = () => {
         }
       } catch (error) {
         console.error("Error fetching content:", error);
-        toast.error("Failed to load content");
+        toast({
+          title: "Error",
+          description: "Failed to load content",
+          variant: "destructive"
+        });
       } finally {
         setJobsLoading(false);
         setResourcesLoading(false);
@@ -172,10 +176,17 @@ const EmployerContent = () => {
       if (error) throw error;
       
       setJobs(jobs.filter(job => job.id !== id));
-      toast.success("Job deleted successfully");
+      toast({
+        title: "Success",
+        description: "Job deleted successfully"
+      });
     } catch (error) {
       console.error("Error deleting job:", error);
-      toast.error("Failed to delete job");
+      toast({
+        title: "Error",
+        description: "Failed to delete job",
+        variant: "destructive"
+      });
     } finally {
       setJobsLoading(false);
     }
@@ -212,7 +223,10 @@ const EmployerContent = () => {
         result = data[0];
         
         setJobs(jobs.map(job => job.id === jobForm.id ? result : job));
-        toast.success("Job updated successfully");
+        toast({
+          title: "Success",
+          description: "Job updated successfully"
+        });
       } else {
         const { data, error } = await supabase
           .from('job_postings')
@@ -223,14 +237,21 @@ const EmployerContent = () => {
         result = data[0];
         
         setJobs([...jobs, result]);
-        toast.success("Job created successfully");
+        toast({
+          title: "Success",
+          description: "Job created successfully"
+        });
       }
       
       resetJobForm();
       setShowJobDialog(false);
     } catch (error) {
       console.error("Error saving job:", error);
-      toast.error("Failed to save job");
+      toast({
+        title: "Error",
+        description: "Failed to save job",
+        variant: "destructive"
+      });
     } finally {
       setJobsLoading(false);
     }
@@ -293,10 +314,17 @@ const EmployerContent = () => {
       if (error) throw error;
       
       setResources(resources.filter(resource => resource.id !== id));
-      toast.success("Resource deleted successfully");
+      toast({
+        title: "Success",
+        description: "Resource deleted successfully"
+      });
     } catch (error) {
       console.error("Error deleting resource:", error);
-      toast.error("Failed to delete resource");
+      toast({
+        title: "Error",
+        description: "Failed to delete resource",
+        variant: "destructive"
+      });
     } finally {
       setResourcesLoading(false);
     }
@@ -332,7 +360,10 @@ const EmployerContent = () => {
         result = data[0];
         
         setResources(resources.map(resource => resource.id === resourceForm.id ? result : resource));
-        toast.success("Resource updated successfully");
+        toast({
+          title: "Success",
+          description: "Resource updated successfully"
+        });
       } else {
         // Use any to bypass type checking for supabase query
         const { data, error } = await supabase
@@ -344,14 +375,21 @@ const EmployerContent = () => {
         result = data[0];
         
         setResources([...resources, result]);
-        toast.success("Resource created successfully");
+        toast({
+          title: "Success",
+          description: "Resource created successfully"
+        });
       }
       
       resetResourceForm();
       setShowResourceDialog(false);
     } catch (error) {
       console.error("Error saving resource:", error);
-      toast.error("Failed to save resource");
+      toast({
+        title: "Error",
+        description: "Failed to save resource",
+        variant: "destructive"
+      });
     } finally {
       setResourcesLoading(false);
     }
