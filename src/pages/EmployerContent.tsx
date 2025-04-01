@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { Plus, Edit, Trash, FilePlus } from "lucide-react";
-import { Resource } from '@/types/resource';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { TableName } from '@/types/database';
 
 const EmployerContent = () => {
   const [user, setUser] = useState(null);
@@ -35,7 +37,7 @@ const EmployerContent = () => {
   
   // Resource management logic
   const [resourcesLoading, setResourcesLoading] = useState(false);
-  const [resources, setResources] = useState<Resource[]>([]);
+  const [resources, setResources] = useState([]);
   const [isEditingResource, setIsEditingResource] = useState(false);
   const [showResourceDialog, setShowResourceDialog] = useState(false);
   const [resourceForm, setResourceForm] = useState({

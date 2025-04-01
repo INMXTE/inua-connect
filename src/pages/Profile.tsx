@@ -1,16 +1,78 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { RootState } from '@/store';
-import { setIsEditing, updateProfile } from '@/store/profileSlice';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
+import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { UserRole, Profile as ProfileType } from '@/types/supabase';
+import { useToast } from "@/hooks/use-toast";
+import { useDispatch, useSelector } from 'react-redux';
+import { setIsEditing, updateProfile } from '@/store/profileSlice';
+import { RootState } from '@/store';
+import { FileText } from 'lucide-react';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { ExtendedProfile } from '@/types/database';
+
+const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, setProfileData: React.Dispatch<React.SetStateAction<Partial<ExtendedProfile>>>) => {
+  try {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `profile-photos/${fileName}`;
+    
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file);
+    
+    if (uploadError) {
+      throw uploadError;
+    }
+    
+    const { data } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(filePath);
+    
+    setProfileData(prev => ({
+      ...prev,
+      photo: data.publicUrl
+    }));
+  } catch (error) {
+    console.error('Error uploading image:', error);
+  }
+};
+
+const handleCVUpload = async (e: React.ChangeEvent<HTMLInputElement>, setProfileData: React.Dispatch<React.SetStateAction<Partial<ExtendedProfile>>>) => {
+  try {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `cv-files/${fileName}`;
+    
+    const { error: uploadError } = await supabase.storage
+      .from('documents')
+      .upload(filePath, file);
+    
+    if (uploadError) {
+      throw uploadError;
+    }
+    
+    const { data } = supabase.storage
+      .from('documents')
+      .getPublicUrl(filePath);
+    
+    setProfileData(prev => ({
+      ...prev,
+      cv_url: data.publicUrl
+    }));
+  } catch (error) {
+    console.error('Error uploading CV:', error);
+  }
+};
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -18,7 +80,7 @@ const Profile = () => {
   const storeProfile = useSelector((state: RootState) => state.profile.profile);
   
   const [user, setUser] = useState(null);
-  const [profile, setProfile] = useState<Partial<ProfileType>>({
+  const [profile, setProfile] = useState<Partial<ExtendedProfile>>({
     full_name: '',
     phone: '',
     skills: [],
@@ -172,7 +234,7 @@ const Profile = () => {
                   id="profileImageUpload" 
                   type="file" 
                   accept="image/*" 
-                  onChange={handleImageUpload}
+                  onChange={(e) => handleImageUpload(e, setProfile)}
                   disabled={loading}
                 />
               </div>
@@ -184,7 +246,7 @@ const Profile = () => {
                     id="cvUpload" 
                     type="file" 
                     accept=".pdf,.doc,.docx" 
-                    onChange={handleCVUpload}
+                    onChange={(e) => handleCVUpload(e, setProfile)}
                     disabled={loading}
                   />
                   {profile.cv_url && (

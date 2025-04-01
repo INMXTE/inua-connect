@@ -1,9 +1,10 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { ExtendedProfile } from '@/types/database';
 
 interface ProfileState {
   isEditing: boolean;
-  profile: any; // This should be properly typed based on your profile structure
+  profile: ExtendedProfile | null;
 }
 
 const initialState: ProfileState = {
@@ -18,7 +19,7 @@ const profileSlice = createSlice({
     setIsEditing: (state, action: PayloadAction<boolean>) => {
       state.isEditing = action.payload;
     },
-    updateProfile: (state, action: PayloadAction<any>) => {
+    updateProfile: (state, action: PayloadAction<ExtendedProfile>) => {
       state.profile = action.payload;
     }
   }
