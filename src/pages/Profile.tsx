@@ -13,6 +13,7 @@ import { RootState } from '@/store';
 import { FileText } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { ExtendedProfile } from '@/types/database';
+import { UserRole } from '@/types/supabase';
 
 const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, setProfileData: React.Dispatch<React.SetStateAction<Partial<ExtendedProfile>>>) => {
   try {
@@ -75,12 +76,14 @@ const handleCVUpload = async (e: React.ChangeEvent<HTMLInputElement>, setProfile
 };
 
 const Profile = () => {
+  const { toast } = useToast();
   const dispatch = useDispatch();
   const isEditing = useSelector((state: RootState) => state.profile.isEditing);
   const storeProfile = useSelector((state: RootState) => state.profile.profile);
   
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<Partial<ExtendedProfile>>({
+    id: '',
     full_name: '',
     phone: '',
     skills: [],
@@ -171,11 +174,15 @@ const Profile = () => {
     dispatch(setIsEditing(!isEditing));
   };
   
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
       setLoading(true);
+      
+      if (!profile.id) {
+        profile.id = user.id;
+      }
       
       const { error } = await supabase
         .from('profiles')
@@ -195,12 +202,19 @@ const Profile = () => {
       
       if (error) throw error;
       
-      dispatch(updateProfile(profile));
+      dispatch(updateProfile(profile as ExtendedProfile));
       dispatch(setIsEditing(false));
-      toast.success('Profile updated successfully');
+      toast({
+        title: "Success",
+        description: "Profile updated successfully"
+      });
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast.error('Failed to update profile');
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }

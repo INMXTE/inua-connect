@@ -1,8 +1,10 @@
+
 import { Resource } from './resource';
 import { UserRole, Profile, Partner } from './supabase';
 
 // Extend Supabase generated types with any additional properties
 export interface ExtendedProfile extends Profile {
+  id: string; // Make id required for ExtendedProfile
   email?: string;
 }
 
@@ -64,6 +66,9 @@ export interface Certificate {
   created_at?: string;
   updated_at?: string;
 }
+
+// Define extended UserRole type to match what's used in ManageJobs
+export type ExtendedUserRole = UserRole | 'admin';
 
 // For reference to supported table types in Supabase
 export type TableName = 'profiles' | 'job_postings' | 'certificates' | 

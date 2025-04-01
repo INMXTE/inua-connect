@@ -18,6 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { UserRole } from '@/types/supabase';
 import { TableName } from '@/types/database';
 import { useNavigate } from 'react-router-dom';
+import { ExtendedUserRole } from '@/types/database';
 
 const ManageResources = () => {
   const [resources, setResources] = useState([]);
@@ -31,6 +32,13 @@ const ManageResources = () => {
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const checkAccessPermissions = () => {
+    if ((userRole as ExtendedUserRole) === 'admin') {
+      return true;
+    }
+    return false;
+  };
 
   useEffect(() => {
     const fetchResources = async () => {
@@ -71,7 +79,7 @@ const ManageResources = () => {
   }, [toast]);
   
   useEffect(() => {
-    if (userRole !== 'admin' && userRole !== 'hr_admin') {
+    if (!checkAccessPermissions()) {
       navigate('/');
     }
   }, [userRole, navigate]);

@@ -15,7 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { UserRole } from '@/types/supabase';
+import { UserRole, ExtendedUserRole } from '@/types/supabase';
 import { useNavigate } from 'react-router-dom';
 import { Edit, Trash2, Plus, Search } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -63,6 +63,10 @@ const ManageJobs = () => {
       if (profileData) {
         setUserRole(profileData.role as UserRole);
         
+        if (checkAccessPermissions()) {
+          return;
+        }
+        
         if (profileData.role !== 'admin' && profileData.role !== 'hr_admin') {
           navigate('/');
         }
@@ -94,6 +98,13 @@ const ManageJobs = () => {
     } finally {
       setLoading(false);
     }
+  };
+  
+  const checkAccessPermissions = () => {
+    if ((userRole as ExtendedUserRole) === 'admin') {
+      return true;
+    }
+    return false;
   };
   
   const handleAddJob = async () => {

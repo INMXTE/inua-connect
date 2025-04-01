@@ -4,6 +4,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from "@/components/ui/dialog";
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import {
   Select, 
   SelectContent, 
   SelectItem, 
@@ -13,9 +24,12 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { Plus, Edit, Trash } from 'lucide-react';
 import { TableName } from '@/types/database';
 
 const EmployerContent = () => {
+  const { toast } = useToast();
+  
   const [user, setUser] = useState(null);
   
   // Job management logic
