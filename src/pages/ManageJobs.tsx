@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
@@ -17,7 +16,6 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { UserRole } from '@/types/supabase';
-import { ExtendedUserRole } from '@/types/database';
 import { useNavigate } from 'react-router-dom';
 import { Edit, Trash2, Plus, Search } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -103,7 +101,7 @@ const ManageJobs = () => {
   };
   
   const checkAccessPermissions = () => {
-    if ((userRole as ExtendedUserRole) === 'admin') {
+    if (userRole === 'admin') {
       return true;
     }
     return false;
@@ -335,7 +333,6 @@ const ManageJobs = () => {
         </CardContent>
       </Card>
       
-      {/* Add Job Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
@@ -462,7 +459,6 @@ const ManageJobs = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Edit Job Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
