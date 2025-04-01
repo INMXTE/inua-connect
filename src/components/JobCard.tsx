@@ -6,7 +6,24 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Briefcase, MapPin, Calendar, ExternalLink } from "lucide-react";
 
-interface JobCardProps {
+export type JobType = "Full-time" | "Part-time" | "Internship" | "Apprenticeship" | "Contract";
+
+export interface JobProps {
+  id: string;
+  title: string;
+  company?: string;
+  location?: string;
+  type?: JobType | string;
+  category?: string;
+  description: string;
+  postedDate?: string;
+  applicationUrl?: string;
+  posted?: string;
+  salary?: string;
+  skills?: string[];
+}
+
+export interface JobCardProps {
   id: string;
   title: string;
   company?: string;

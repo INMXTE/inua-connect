@@ -1,203 +1,149 @@
-
-import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { updateProfile } from "@/store/profileSlice";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { RootState } from '@/store';
+import { setIsEditing, updateProfile } from '@/store/profileSlice';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { UserRole, Profile as ProfileType } from '@/types/supabase';
 
 const Profile = () => {
-  const profile = useSelector((state) => state.profile);
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const isEditing = useSelector((state: RootState) => state.profile.isEditing);
+  const storeProfile = useSelector((state: RootState) => state.profile.profile);
+  
   const [user, setUser] = useState(null);
-  const [isEmployer, setIsEmployer] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    bio: "",
-    skills: "",
-    interests: "",
-    education: "",
-    experience: "",
-    profileImage: "",
-    cvFile: "",
+  const [profile, setProfile] = useState<Partial<ProfileType>>({
+    full_name: '',
+    phone: '',
+    skills: [],
+    photo: '',
+    bio: '',
+    interests: [],
+    education: '',
+    experience: '',
+    role: 'worker' as UserRole,
+    cv_url: '',
   });
   const [loading, setLoading] = useState(false);
-
+  
   useEffect(() => {
-    const fetchUserData = async () => {
+    fetchUserProfile();
+  }, []);
+  
+  useEffect(() => {
+    if (storeProfile) {
+      setProfile(storeProfile);
+    }
+  }, [storeProfile]);
+  
+  const fetchUserProfile = async () => {
+    try {
+      setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
       
       if (user) {
-        // Fetch user profile data from Supabase
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', user.id)
           .single();
         
+        if (error) {
+          throw error;
+        }
+        
         if (data) {
-          // Check if user is employer or admin
-          setIsEmployer(data.role === 'employer');
-          setIsAdmin(data.role === 'admin');
+          const profileData = {
+            ...data,
+            bio: data.bio || '',
+            interests: data.interests || [],
+            education: data.education || '',
+            experience: data.experience || '',
+            cv_url: data.cv_url || '',
+          };
           
-          // Initialize form with data from database
-          setFormData({
-            fullName: data.full_name || "",
-            email: user.email || "",
-            phone: data.phone || "",
-            bio: data.bio || "",
-            skills: Array.isArray(data.skills) ? data.skills.join(", ") : data.skills || "",
-            interests: Array.isArray(data.interests) ? data.interests.join(", ") : data.interests || "",
-            education: data.education || "",
-            experience: data.experience || "",
-            profileImage: data.photo || "",
-            cvFile: data.cv_url || "",
-          });
-          
-          // Update Redux store
-          dispatch(updateProfile({
-            fullName: data.full_name,
-            email: user.email,
-            phone: data.phone,
-            bio: data.bio,
-            skills: data.skills,
-            interests: data.interests,
-            education: data.education,
-            experience: data.experience,
-            profileImage: data.photo,
-            cvFile: data.cv_url,
-          }));
+          setProfile(profileData);
+          dispatch(updateProfile(profileData));
         }
       }
-    };
-
-    fetchUserData();
-  }, [dispatch]);
-
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      toast.error('Failed to load profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setProfile({
+      ...profile,
+      [name]: value
+    });
   };
-
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    setLoading(true);
-    
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-      const filePath = `profile-images/${fileName}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('profiles')
-        .upload(filePath, file);
-        
-      if (uploadError) throw uploadError;
-      
-      const { data } = supabase.storage.from('profiles').getPublicUrl(filePath);
-      
-      setFormData({ ...formData, profileImage: data.publicUrl });
-      toast.success("Profile image uploaded successfully");
-    } catch (error) {
-      toast.error("Error uploading image: " + error.message);
-    } finally {
-      setLoading(false);
-    }
+  
+  const handleSkillsChange = (e) => {
+    const skills = e.target.value.split(',').map(skill => skill.trim());
+    setProfile({
+      ...profile,
+      skills
+    });
   };
-
-  const handleCVUpload = async (e) => {
-    if (isEmployer) return; // Employers don't need CV
-    
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    setLoading(true);
-    
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-      const filePath = `cvs/${fileName}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('profiles')
-        .upload(filePath, file);
-        
-      if (uploadError) throw uploadError;
-      
-      const { data } = supabase.storage.from('profiles').getPublicUrl(filePath);
-      
-      setFormData({ ...formData, cvFile: data.publicUrl });
-      toast.success("CV uploaded successfully");
-    } catch (error) {
-      toast.error("Error uploading CV: " + error.message);
-    } finally {
-      setLoading(false);
-    }
+  
+  const handleInterestsChange = (e) => {
+    const interests = e.target.value.split(',').map(interest => interest.trim());
+    setProfile({
+      ...profile,
+      interests
+    });
   };
-
+  
+  const toggleEdit = () => {
+    dispatch(setIsEditing(!isEditing));
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     
     try {
-      // Convert comma-separated strings to arrays
-      const skillsArray = formData.skills ? formData.skills.split(',').map(skill => skill.trim()) : [];
-      const interestsArray = formData.interests ? formData.interests.split(',').map(interest => interest.trim()) : [];
+      setLoading(true);
       
-      // Update profile in Supabase
       const { error } = await supabase
         .from('profiles')
         .update({
-          full_name: formData.fullName,
-          phone: formData.phone,
-          bio: formData.bio,
-          skills: skillsArray,
-          interests: interestsArray,
-          education: formData.education,
-          experience: formData.experience,
-          photo: formData.profileImage,
-          cv_url: formData.cvFile,
-          updated_at: new Date()
+          full_name: profile.full_name,
+          phone: profile.phone,
+          skills: profile.skills,
+          photo: profile.photo,
+          bio: profile.bio,
+          interests: profile.interests,
+          education: profile.education,
+          experience: profile.experience,
+          cv_url: profile.cv_url,
+          updated_at: new Date().toISOString()
         })
         .eq('id', user.id);
-        
+      
       if (error) throw error;
       
-      // Update Redux store
-      dispatch(updateProfile({
-        fullName: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        bio: formData.bio,
-        skills: skillsArray,
-        interests: interestsArray,
-        education: formData.education,
-        experience: formData.experience,
-        profileImage: formData.profileImage,
-        cvFile: formData.cvFile,
-      }));
-      
-      toast.success("Profile updated successfully");
+      dispatch(updateProfile(profile));
+      dispatch(setIsEditing(false));
+      toast.success('Profile updated successfully');
     } catch (error) {
-      toast.error("Error updating profile: " + error.message);
+      console.error('Error updating profile:', error);
+      toast.error('Failed to update profile');
     } finally {
       setLoading(false);
     }
   };
-
+  
   return (
     <div className="container mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-8 text-center">Profile</h1>
@@ -208,17 +154,16 @@ const Profile = () => {
             <CardHeader className="text-center">
               <div className="flex justify-center mb-4">
                 <Avatar className="h-24 w-24">
-                  {formData.profileImage ? (
-                    <AvatarImage src={formData.profileImage} alt={formData.fullName} />
+                  {profile.photo ? (
+                    <AvatarImage src={profile.photo} alt={profile.full_name} />
                   ) : (
-                    <AvatarFallback>{formData.fullName.charAt(0)}</AvatarFallback>
+                    <AvatarFallback>{profile.full_name.charAt(0)}</AvatarFallback>
                   )}
                 </Avatar>
               </div>
-              <CardTitle>{formData.fullName || "Your Name"}</CardTitle>
-              <p className="text-sm text-gray-500">{formData.email}</p>
-              {isEmployer && <p className="text-sm text-blue-500 font-medium">Employer</p>}
-              {isAdmin && <p className="text-sm text-purple-500 font-medium">Admin</p>}
+              <CardTitle>{profile.full_name || "Your Name"}</CardTitle>
+              <p className="text-sm text-gray-500">{profile.email}</p>
+              {isEditing && <p className="text-sm text-blue-500 font-medium">Editing</p>}
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -232,7 +177,7 @@ const Profile = () => {
                 />
               </div>
 
-              {!isEmployer && (
+              {!isEditing && (
                 <div>
                   <Label htmlFor="cvUpload">CV/Resume</Label>
                   <Input 
@@ -242,9 +187,9 @@ const Profile = () => {
                     onChange={handleCVUpload}
                     disabled={loading}
                   />
-                  {formData.cvFile && (
+                  {profile.cv_url && (
                     <a 
-                      href={formData.cvFile} 
+                      href={profile.cv_url} 
                       target="_blank" 
                       rel="noopener noreferrer" 
                       className="text-sm text-blue-500 underline block mt-2"
@@ -271,7 +216,7 @@ const Profile = () => {
                     <Input 
                       id="fullName" 
                       name="fullName" 
-                      value={formData.fullName} 
+                      value={profile.full_name} 
                       onChange={handleChange} 
                       disabled={loading}
                     />
@@ -282,7 +227,7 @@ const Profile = () => {
                     <Input 
                       id="email" 
                       name="email" 
-                      value={formData.email} 
+                      value={profile.email} 
                       disabled={true} 
                     />
                   </div>
@@ -292,7 +237,7 @@ const Profile = () => {
                     <Input 
                       id="phone" 
                       name="phone" 
-                      value={formData.phone} 
+                      value={profile.phone} 
                       onChange={handleChange} 
                       disabled={loading}
                     />
@@ -304,7 +249,7 @@ const Profile = () => {
                   <Textarea 
                     id="bio" 
                     name="bio" 
-                    value={formData.bio} 
+                    value={profile.bio} 
                     onChange={handleChange} 
                     rows={4}
                     disabled={loading}
@@ -316,8 +261,8 @@ const Profile = () => {
                   <Textarea 
                     id="skills" 
                     name="skills" 
-                    value={formData.skills} 
-                    onChange={handleChange}
+                    value={profile.skills.join(',')} 
+                    onChange={handleSkillsChange}
                     rows={2}
                     disabled={loading}
                   />
@@ -328,21 +273,21 @@ const Profile = () => {
                   <Textarea 
                     id="interests" 
                     name="interests" 
-                    value={formData.interests} 
-                    onChange={handleChange}
+                    value={profile.interests.join(',')} 
+                    onChange={handleInterestsChange}
                     rows={2}
                     disabled={loading}
                   />
                 </div>
                 
-                {!isEmployer && (
+                {!isEditing && (
                   <>
                     <div className="space-y-2">
                       <Label htmlFor="education">Education</Label>
                       <Textarea 
                         id="education" 
                         name="education" 
-                        value={formData.education} 
+                        value={profile.education} 
                         onChange={handleChange}
                         rows={3}
                         disabled={loading}
@@ -354,7 +299,7 @@ const Profile = () => {
                       <Textarea 
                         id="experience" 
                         name="experience" 
-                        value={formData.experience} 
+                        value={profile.experience} 
                         onChange={handleChange}
                         rows={3}
                         disabled={loading}

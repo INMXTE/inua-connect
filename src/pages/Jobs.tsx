@@ -190,7 +190,18 @@ const Jobs = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {paginatedJobs.length > 0 ? (
                 paginatedJobs.map((job) => (
-                  <JobCard key={job.id} job={job} />
+                  <JobCard 
+                    key={job.id}
+                    id={job.id}
+                    title={job.title}
+                    company={job.company}
+                    location={job.location}
+                    type={job.type}
+                    category={job.category}
+                    description={job.description}
+                    postedDate={job.posted}
+                    applicationUrl="#"
+                  />
                 ))
               ) : (
                 <div className="col-span-full text-center py-12">

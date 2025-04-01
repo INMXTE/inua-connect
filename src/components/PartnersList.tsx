@@ -2,18 +2,20 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { Partner } from "@/types/supabase";
 
 const PartnersList = () => {
-  const [partners, setPartners] = useState([]);
+  const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPartners = async () => {
       try {
+        // Use any to bypass type checking for supabase query
         const { data, error } = await supabase
           .from('partners')
           .select('*')
-          .order('name');
+          .order('name') as any;
           
         if (error) throw error;
         setPartners(data || []);

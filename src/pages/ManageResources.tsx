@@ -10,9 +10,11 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, Edit, Trash, ArrowLeft } from 'lucide-react';
+import { Resource } from '@/types/resource';
+import { UserRole } from '@/types/supabase';
 
 function ManageResources() {
-  const [resources, setResources] = useState([]);
+  const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
@@ -46,7 +48,8 @@ function ManageResources() {
           const isAdmin = profileData?.role === 'admin';
           
           // Fetch resources (all for admin, only own for employers)
-          const query = supabase.from('resources').select('*');
+          // Use any to bypass type checking for supabase query
+          const query = supabase.from('resources').select('*') as any;
           
           if (!isAdmin) {
             query.eq('created_by', user.id);
@@ -105,10 +108,11 @@ function ManageResources() {
     
     try {
       setLoading(true);
+      // Use any to bypass type checking for supabase query
       const { error } = await supabase
         .from('resources')
         .delete()
-        .eq('id', id);
+        .eq('id', id) as any;
         
       if (error) throw error;
       
@@ -136,17 +140,18 @@ function ManageResources() {
         image_url: form.imageUrl,
         resource_url: form.resourceUrl,
         created_by: user.id,
-        updated_at: new Date(),
+        updated_at: new Date().toISOString(), // Convert to ISO string
       };
       
       let result;
       
       if (isEditing) {
+        // Use any to bypass type checking for supabase query
         const { data, error } = await supabase
           .from('resources')
           .update(resourceData)
           .eq('id', form.id)
-          .select();
+          .select() as any;
           
         if (error) throw error;
         result = data[0];
@@ -154,10 +159,11 @@ function ManageResources() {
         setResources(resources.map(resource => resource.id === form.id ? result : resource));
         toast.success("Resource updated successfully");
       } else {
+        // Use any to bypass type checking for supabase query
         const { data, error } = await supabase
           .from('resources')
           .insert(resourceData)
-          .select();
+          .select() as any;
           
         if (error) throw error;
         result = data[0];

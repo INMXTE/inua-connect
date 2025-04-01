@@ -1,6 +1,6 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { JobProps } from '@/components/JobCard';
+import { JobProps } from '@/components/JobCard';
 
 interface JobsState {
   jobs: JobProps[];

@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, Edit, Trash } from 'lucide-react';
+import { UserRole } from '@/types/supabase';
 
 const ManageJobs = () => {
   const [jobs, setJobs] = useState([]);
@@ -145,7 +146,7 @@ const ManageJobs = () => {
         status: form.status,
         posted_by: user.id,
         application_url: form.applicationUrl,
-        updated_at: new Date(),
+        updated_at: new Date().toISOString(), // Convert to ISO string
       };
       
       let result;

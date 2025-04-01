@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { User, ChevronDown, Menu, X, Home, Briefcase, BookOpen, LayoutDashboard, FilePlus, UserCircle, LogOut } from "lucide-react";
 
 interface NavbarProps {
@@ -20,7 +19,7 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ userRole }) => {
   const [user, setUser] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
 
   useEffect(() => {

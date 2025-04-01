@@ -1,25 +1,26 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Edit, Trash, ExternalLink } from "lucide-react";
+import { Plus, Edit, Trash, FilePlus } from "lucide-react";
+import { Resource } from '@/types/resource';
 
 const EmployerContent = () => {
-  const [activeTab, setActiveTab] = useState("jobs");
-  const [jobs, setJobs] = useState([]);
-  const [resources, setResources] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [user, setUser] = useState(null);
   
-  // Job form state
+  // Job management logic
+  const [jobsLoading, setJobsLoading] = useState(false);
+  const [jobs, setJobs] = useState([]);
+  const [isEditingJob, setIsEditingJob] = useState(false);
+  const [showJobDialog, setShowJobDialog] = useState(false);
   const [jobForm, setJobForm] = useState({
     id: null,
     title: "",
@@ -28,10 +29,15 @@ const EmployerContent = () => {
     type: "full-time",
     category: "",
     requirements: "",
+    status: "open",
     applicationUrl: "",
   });
   
-  // Resource form state
+  // Resource management logic
+  const [resourcesLoading, setResourcesLoading] = useState(false);
+  const [resources, setResources] = useState<Resource[]>([]);
+  const [isEditingResource, setIsEditingResource] = useState(false);
+  const [showResourceDialog, setShowResourceDialog] = useState(false);
   const [resourceForm, setResourceForm] = useState({
     id: null,
     title: "",
@@ -42,76 +48,48 @@ const EmployerContent = () => {
     resourceUrl: "",
   });
   
-  const [isEditingJob, setIsEditingJob] = useState(false);
-  const [isEditingResource, setIsEditingResource] = useState(false);
-  const [showJobDialog, setShowJobDialog] = useState(false);
-  const [showResourceDialog, setShowResourceDialog] = useState(false);
-  
   useEffect(() => {
-    const fetchUserAndContent = async () => {
+    const fetchUserData = async () => {
       try {
         // Get current user
         const { data: { user } } = await supabase.auth.getUser();
         setUser(user);
         
         if (user) {
-          fetchJobs(user.id);
-          fetchResources(user.id);
+          // Fetch jobs
+          const { data: jobData, error: jobError } = await supabase
+            .from('job_postings')
+            .select('*')
+            .eq('posted_by', user.id)
+            .order('created_at', { ascending: false });
+            
+          if (jobError) throw jobError;
+          setJobs(jobData || []);
+          
+          // Fetch resources
+          // Use any to bypass type checking for supabase query
+          const { data: resourceData, error: resourceError } = await supabase
+            .from('resources')
+            .select('*')
+            .eq('created_by', user.id)
+            .order('created_at', { ascending: false }) as any;
+            
+          if (resourceError) throw resourceError;
+          setResources(resourceData || []);
         }
       } catch (error) {
-        console.error("Error fetching user data:", error);
+        console.error("Error fetching content:", error);
+        toast.error("Failed to load content");
+      } finally {
+        setJobsLoading(false);
+        setResourcesLoading(false);
       }
     };
     
-    fetchUserAndContent();
+    fetchUserData();
   }, []);
   
-  const fetchJobs = async (userId) => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('job_postings')
-        .select('*')
-        .eq('posted_by', userId);
-        
-      if (error) throw error;
-      setJobs(data || []);
-    } catch (error) {
-      console.error("Error fetching jobs:", error);
-      toast.error("Failed to load jobs");
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  const fetchResources = async (userId) => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('resources')
-        .select('*')
-        .eq('created_by', userId);
-        
-      if (error) throw error;
-      setResources(data || []);
-    } catch (error) {
-      console.error("Error fetching resources:", error);
-      toast.error("Failed to load resources");
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  const handleJobFormChange = (e) => {
-    const { name, value } = e.target;
-    setJobForm({ ...jobForm, [name]: value });
-  };
-  
-  const handleResourceFormChange = (e) => {
-    const { name, value } = e.target;
-    setResourceForm({ ...resourceForm, [name]: value });
-  };
-  
+  // Job form handlers
   const resetJobForm = () => {
     setJobForm({
       id: null,
@@ -121,22 +99,32 @@ const EmployerContent = () => {
       type: "full-time",
       category: "",
       requirements: "",
+      status: "open",
       applicationUrl: "",
     });
     setIsEditingJob(false);
   };
   
-  const resetResourceForm = () => {
-    setResourceForm({
-      id: null,
-      title: "",
-      description: "",
-      category: "",
-      type: "article",
-      imageUrl: "",
-      resourceUrl: "",
+  const handleJobChange = (e) => {
+    const { name, value } = e.target;
+    setJobForm({
+      ...jobForm,
+      [name]: value
     });
-    setIsEditingResource(false);
+  };
+  
+  const handleJobTypeChange = (value) => {
+    setJobForm({
+      ...jobForm,
+      type: value
+    });
+  };
+  
+  const handleJobStatusChange = (value) => {
+    setJobForm({
+      ...jobForm,
+      status: value
+    });
   };
   
   const handleEditJob = (job) => {
@@ -148,31 +136,18 @@ const EmployerContent = () => {
       type: job.type || "full-time",
       category: job.category || "",
       requirements: job.requirements?.details || "",
+      status: job.status || "open",
       applicationUrl: job.application_url || "",
     });
     setIsEditingJob(true);
     setShowJobDialog(true);
   };
   
-  const handleEditResource = (resource) => {
-    setResourceForm({
-      id: resource.id,
-      title: resource.title,
-      description: resource.description,
-      category: resource.category || "",
-      type: resource.type || "article",
-      imageUrl: resource.image_url || "",
-      resourceUrl: resource.resource_url || "",
-    });
-    setIsEditingResource(true);
-    setShowResourceDialog(true);
-  };
-  
   const handleDeleteJob = async (id) => {
     if (!confirm("Are you sure you want to delete this job posting?")) return;
     
     try {
-      setLoading(true);
+      setJobsLoading(true);
       const { error } = await supabase
         .from('job_postings')
         .delete()
@@ -186,29 +161,7 @@ const EmployerContent = () => {
       console.error("Error deleting job:", error);
       toast.error("Failed to delete job");
     } finally {
-      setLoading(false);
-    }
-  };
-  
-  const handleDeleteResource = async (id) => {
-    if (!confirm("Are you sure you want to delete this resource?")) return;
-    
-    try {
-      setLoading(true);
-      const { error } = await supabase
-        .from('resources')
-        .delete()
-        .eq('id', id);
-        
-      if (error) throw error;
-      
-      setResources(resources.filter(resource => resource.id !== id));
-      toast.success("Resource deleted successfully");
-    } catch (error) {
-      console.error("Error deleting resource:", error);
-      toast.error("Failed to delete resource");
-    } finally {
-      setLoading(false);
+      setJobsLoading(false);
     }
   };
   
@@ -216,7 +169,7 @@ const EmployerContent = () => {
     e.preventDefault();
     
     try {
-      setLoading(true);
+      setJobsLoading(true);
       
       const jobData = {
         title: jobForm.title,
@@ -225,6 +178,7 @@ const EmployerContent = () => {
         type: jobForm.type,
         category: jobForm.category,
         requirements: { details: jobForm.requirements },
+        status: jobForm.status,
         posted_by: user.id,
         application_url: jobForm.applicationUrl,
       };
@@ -262,7 +216,73 @@ const EmployerContent = () => {
       console.error("Error saving job:", error);
       toast.error("Failed to save job");
     } finally {
-      setLoading(false);
+      setJobsLoading(false);
+    }
+  };
+  
+  // Resource form handlers
+  const resetResourceForm = () => {
+    setResourceForm({
+      id: null,
+      title: "",
+      description: "",
+      category: "",
+      type: "article",
+      imageUrl: "",
+      resourceUrl: "",
+    });
+    setIsEditingResource(false);
+  };
+  
+  const handleResourceChange = (e) => {
+    const { name, value } = e.target;
+    setResourceForm({
+      ...resourceForm,
+      [name]: value
+    });
+  };
+  
+  const handleResourceTypeChange = (value) => {
+    setResourceForm({
+      ...resourceForm,
+      type: value
+    });
+  };
+  
+  const handleEditResource = (resource) => {
+    setResourceForm({
+      id: resource.id,
+      title: resource.title,
+      description: resource.description || "",
+      category: resource.category || "",
+      type: resource.type || "article",
+      imageUrl: resource.image_url || "",
+      resourceUrl: resource.resource_url || "",
+    });
+    setIsEditingResource(true);
+    setShowResourceDialog(true);
+  };
+  
+  const handleDeleteResource = async (id) => {
+    if (!confirm("Are you sure you want to delete this resource?")) return;
+    
+    try {
+      setResourcesLoading(true);
+      // Use any to bypass type checking for supabase query
+      const { error } = await supabase
+        .from('resources')
+        .delete()
+        .eq('id', id) as any;
+        
+      if (error) throw error;
+      
+      setResources(resources.filter(resource => resource.id !== id));
+      toast.success("Resource deleted successfully");
+    } catch (error) {
+      console.error("Error deleting resource:", error);
+      toast.error("Failed to delete resource");
+    } finally {
+      setResourcesLoading(false);
     }
   };
   
@@ -270,7 +290,7 @@ const EmployerContent = () => {
     e.preventDefault();
     
     try {
-      setLoading(true);
+      setResourcesLoading(true);
       
       const resourceData = {
         title: resourceForm.title,
@@ -285,11 +305,12 @@ const EmployerContent = () => {
       let result;
       
       if (isEditingResource) {
+        // Use any to bypass type checking for supabase query
         const { data, error } = await supabase
           .from('resources')
           .update(resourceData)
           .eq('id', resourceForm.id)
-          .select();
+          .select() as any;
           
         if (error) throw error;
         result = data[0];
@@ -297,10 +318,11 @@ const EmployerContent = () => {
         setResources(resources.map(resource => resource.id === resourceForm.id ? result : resource));
         toast.success("Resource updated successfully");
       } else {
+        // Use any to bypass type checking for supabase query
         const { data, error } = await supabase
           .from('resources')
           .insert(resourceData)
-          .select();
+          .select() as any;
           
         if (error) throw error;
         result = data[0];
@@ -315,27 +337,28 @@ const EmployerContent = () => {
       console.error("Error saving resource:", error);
       toast.error("Failed to save resource");
     } finally {
-      setLoading(false);
+      setResourcesLoading(false);
     }
   };
   
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-8">Content Management</h1>
+      <h1 className="text-3xl font-bold mb-8">Employer Content Management</h1>
       
-      <Tabs defaultValue="jobs" onValueChange={setActiveTab}>
-        <TabsList className="mb-8">
+      <Tabs defaultValue="jobs" className="w-full">
+        <TabsList>
           <TabsTrigger value="jobs">Job Postings</TabsTrigger>
           <TabsTrigger value="resources">Resources</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="jobs">
-          <div className="flex justify-between items-center mb-6">
+        {/* Job Postings Tab */}
+        <TabsContent value="jobs" className="pt-6">
+          <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-semibold">Manage Job Postings</h2>
             <Dialog open={showJobDialog} onOpenChange={setShowJobDialog}>
               <DialogTrigger asChild>
                 <Button onClick={() => { resetJobForm(); setShowJobDialog(true); }}>
-                  <Plus className="mr-2 h-4 w-4" /> Add New Job
+                  <Plus className="mr-2 h-4 w-4" /> Add Job
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[550px]">
@@ -353,23 +376,23 @@ const EmployerContent = () => {
                         id="title"
                         name="title"
                         value={jobForm.title}
-                        onChange={handleJobFormChange}
+                        onChange={handleJobChange}
                         required
                       />
                     </div>
-
+                    
                     <div className="grid gap-2">
                       <Label htmlFor="description">Job Description *</Label>
                       <Textarea
                         id="description"
                         name="description"
                         value={jobForm.description}
-                        onChange={handleJobFormChange}
+                        onChange={handleJobChange}
                         rows={4}
                         required
                       />
                     </div>
-
+                    
                     <div className="grid grid-cols-2 gap-4">
                       <div className="grid gap-2">
                         <Label htmlFor="location">Location</Label>
@@ -377,16 +400,16 @@ const EmployerContent = () => {
                           id="location"
                           name="location"
                           value={jobForm.location}
-                          onChange={handleJobFormChange}
+                          onChange={handleJobChange}
                         />
                       </div>
-
+                      
                       <div className="grid gap-2">
                         <Label htmlFor="type">Job Type</Label>
                         <Select 
                           name="type"
                           value={jobForm.type} 
-                          onValueChange={(value) => setJobForm({...jobForm, type: value})}
+                          onValueChange={handleJobTypeChange}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select job type" />
@@ -400,50 +423,67 @@ const EmployerContent = () => {
                         </Select>
                       </div>
                     </div>
-
+                    
                     <div className="grid gap-2">
                       <Label htmlFor="category">Category</Label>
                       <Input
                         id="category"
                         name="category"
                         value={jobForm.category}
-                        onChange={handleJobFormChange}
+                        onChange={handleJobChange}
                       />
                     </div>
-
+                    
                     <div className="grid gap-2">
                       <Label htmlFor="requirements">Requirements</Label>
                       <Textarea
                         id="requirements"
                         name="requirements"
                         value={jobForm.requirements}
-                        onChange={handleJobFormChange}
+                        onChange={handleJobChange}
                         rows={3}
                       />
                     </div>
-
-                    <div className="grid gap-2">
-                      <Label htmlFor="applicationUrl">Application URL *</Label>
-                      <Input
-                        id="applicationUrl"
-                        name="applicationUrl"
-                        type="url"
-                        value={jobForm.applicationUrl}
-                        onChange={handleJobFormChange}
-                        placeholder="https://example.com/apply"
-                        required
-                      />
-                      <p className="text-sm text-muted-foreground">
-                        Students will be directed to this URL to complete their application
-                      </p>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="status">Status</Label>
+                        <Select 
+                          name="status"
+                          value={jobForm.status} 
+                          onValueChange={handleJobStatusChange}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="open">Open</SelectItem>
+                            <SelectItem value="closed">Closed</SelectItem>
+                            <SelectItem value="draft">Draft</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="grid gap-2">
+                        <Label htmlFor="applicationUrl">Application URL *</Label>
+                        <Input
+                          id="applicationUrl"
+                          name="applicationUrl"
+                          type="url"
+                          value={jobForm.applicationUrl}
+                          onChange={handleJobChange}
+                          placeholder="https://example.com/apply"
+                          required
+                        />
+                      </div>
                     </div>
                   </div>
                   <DialogFooter>
                     <Button type="button" variant="outline" onClick={() => setShowJobDialog(false)}>
                       Cancel
                     </Button>
-                    <Button type="submit" disabled={loading}>
-                      {loading ? "Saving..." : "Save Job"}
+                    <Button type="submit" disabled={jobsLoading}>
+                      {jobsLoading ? "Saving..." : "Save Job"}
                     </Button>
                   </DialogFooter>
                 </form>
@@ -451,81 +491,82 @@ const EmployerContent = () => {
             </Dialog>
           </div>
           
-          {loading && jobs.length === 0 ? (
+          {jobsLoading && jobs.length === 0 ? (
             <div className="text-center py-8">Loading jobs...</div>
           ) : jobs.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-muted-foreground mb-4">You haven't posted any jobs yet.</p>
+              <p className="text-muted-foreground mb-4">No jobs have been posted yet.</p>
               <Button onClick={() => setShowJobDialog(true)}>
-                <Plus className="mr-2 h-4 w-4" /> Add Your First Job
+                <Plus className="mr-2 h-4 w-4" /> Post Your First Job
               </Button>
             </div>
           ) : (
-            <div className="grid gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {jobs.map((job) => (
                 <Card key={job.id}>
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start">
                       <CardTitle>{job.title}</CardTitle>
-                      <div>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleEditJob(job)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleDeleteJob(job.id)}
-                        >
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      </div>
+                      <Badge 
+                        variant={job.status === 'open' ? 'default' : 'secondary'}
+                        className="capitalize"
+                      >
+                        {job.status}
+                      </Badge>
                     </div>
-                    <CardDescription>
+                    <div className="text-sm text-muted-foreground">
                       {job.location && `${job.location} • `}
-                      {job.type && `${job.type} • `}
-                      {job.status || "Open"}
-                    </CardDescription>
+                      {job.type && `${job.type}`}
+                      {job.category && ` • ${job.category}`}
+                    </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm line-clamp-2">{job.description}</p>
+                    <p className="text-sm line-clamp-3 mb-4">{job.description}</p>
+                    
                     {job.application_url && (
-                      <div className="mt-4">
+                      <div className="mt-2">
                         <a 
                           href={job.application_url} 
                           target="_blank" 
-                          rel="noopener noreferrer"
-                          className="flex items-center text-sm text-blue-600 hover:underline"
+                          rel="noopener noreferrer" 
+                          className="text-sm text-blue-600 hover:underline"
                         >
-                          <ExternalLink className="h-3 w-3 mr-1" />
-                          Application URL
+                          Application URL: {job.application_url}
                         </a>
                       </div>
                     )}
                   </CardContent>
+                  <CardFooter className="border-t pt-4">
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={() => handleEditJob(job)}>
+                        <Edit className="h-4 w-4 mr-1" /> Edit
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => handleDeleteJob(job.id)}>
+                        <Trash className="h-4 w-4 mr-1" /> Delete
+                      </Button>
+                    </div>
+                  </CardFooter>
                 </Card>
               ))}
             </div>
           )}
         </TabsContent>
         
-        <TabsContent value="resources">
-          <div className="flex justify-between items-center mb-6">
+        {/* Resources Tab */}
+        <TabsContent value="resources" className="pt-6">
+          <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-semibold">Manage Resources</h2>
             <Dialog open={showResourceDialog} onOpenChange={setShowResourceDialog}>
               <DialogTrigger asChild>
                 <Button onClick={() => { resetResourceForm(); setShowResourceDialog(true); }}>
-                  <Plus className="mr-2 h-4 w-4" /> Add New Resource
+                  <Plus className="mr-2 h-4 w-4" /> Add Resource
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[550px]">
                 <DialogHeader>
-                  <DialogTitle>{isEditingResource ? "Edit Resource" : "Create Resource"}</DialogTitle>
+                  <DialogTitle>{isEditingResource ? "Edit Resource" : "Add Resource"}</DialogTitle>
                   <DialogDescription>
-                    Fill in the details for this resource. Click save when you're done.
+                    Add or update resources for students.
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmitResource}>
@@ -536,7 +577,7 @@ const EmployerContent = () => {
                         id="title"
                         name="title"
                         value={resourceForm.title}
-                        onChange={handleResourceFormChange}
+                        onChange={handleResourceChange}
                         required
                       />
                     </div>
@@ -547,8 +588,8 @@ const EmployerContent = () => {
                         id="description"
                         name="description"
                         value={resourceForm.description}
-                        onChange={handleResourceFormChange}
-                        rows={4}
+                        onChange={handleResourceChange}
+                        rows={3}
                         required
                       />
                     </div>
@@ -560,7 +601,7 @@ const EmployerContent = () => {
                           id="category"
                           name="category"
                           value={resourceForm.category}
-                          onChange={handleResourceFormChange}
+                          onChange={handleResourceChange}
                         />
                       </div>
                       
@@ -569,7 +610,7 @@ const EmployerContent = () => {
                         <Select 
                           name="type"
                           value={resourceForm.type} 
-                          onValueChange={(value) => setResourceForm({...resourceForm, type: value})}
+                          onValueChange={handleResourceTypeChange}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select type" />
@@ -586,14 +627,15 @@ const EmployerContent = () => {
                     </div>
                     
                     <div className="grid gap-2">
-                      <Label htmlFor="imageUrl">Image URL</Label>
+                      <Label htmlFor="imageUrl">Image URL *</Label>
                       <Input
                         id="imageUrl"
                         name="imageUrl"
                         type="url"
                         value={resourceForm.imageUrl}
-                        onChange={handleResourceFormChange}
+                        onChange={handleResourceChange}
                         placeholder="https://example.com/image.jpg"
+                        required
                       />
                       <p className="text-sm text-muted-foreground">
                         URL to an image that represents this resource
@@ -607,7 +649,7 @@ const EmployerContent = () => {
                         name="resourceUrl"
                         type="url"
                         value={resourceForm.resourceUrl}
-                        onChange={handleResourceFormChange}
+                        onChange={handleResourceChange}
                         placeholder="https://example.com/resource"
                         required
                       />
@@ -620,8 +662,8 @@ const EmployerContent = () => {
                     <Button type="button" variant="outline" onClick={() => setShowResourceDialog(false)}>
                       Cancel
                     </Button>
-                    <Button type="submit" disabled={loading}>
-                      {loading ? "Saving..." : "Save Resource"}
+                    <Button type="submit" disabled={resourcesLoading}>
+                      {resourcesLoading ? "Saving..." : "Save Resource"}
                     </Button>
                   </DialogFooter>
                 </form>
@@ -629,77 +671,66 @@ const EmployerContent = () => {
             </Dialog>
           </div>
           
-          {loading && resources.length === 0 ? (
+          {resourcesLoading && resources.length === 0 ? (
             <div className="text-center py-8">Loading resources...</div>
           ) : resources.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-muted-foreground mb-4">You haven't created any resources yet.</p>
+              <p className="text-muted-foreground mb-4">No resources have been added yet.</p>
               <Button onClick={() => setShowResourceDialog(true)}>
                 <Plus className="mr-2 h-4 w-4" /> Add Your First Resource
               </Button>
             </div>
           ) : (
-            <div className="grid gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {resources.map((resource) => (
-                <Card key={resource.id}>
-                  <CardHeader className="pb-3">
-                    <div className="flex justify-between items-start">
-                      <CardTitle>{resource.title}</CardTitle>
-                      <div>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleEditResource(resource)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleDeleteResource(resource.id)}
-                        >
-                          <Trash className="h-4 w-4" />
-                        </Button>
+                <Card key={resource.id} className="overflow-hidden">
+                  <div className="aspect-video relative bg-gray-100">
+                    {resource.image_url ? (
+                      <img 
+                        src={resource.image_url} 
+                        alt={resource.title} 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        No image
                       </div>
+                    )}
+                  </div>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="line-clamp-1">{resource.title}</CardTitle>
+                    <div className="flex text-sm text-muted-foreground">
+                      <span className="capitalize">{resource.type || "Resource"}</span>
+                      {resource.category && (
+                        <>
+                          <span className="mx-1">•</span>
+                          <span>{resource.category}</span>
+                        </>
+                      )}
                     </div>
-                    <CardDescription>
-                      {resource.type && `${resource.type} • `}
-                      {resource.category}
-                    </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm line-clamp-2">{resource.description}</p>
-                    <div className="flex gap-4 mt-4">
-                      {resource.image_url && (
-                        <div>
-                          <p className="text-xs text-muted-foreground mb-1">Image:</p>
-                          <a 
-                            href={resource.image_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="flex items-center text-sm text-blue-600 hover:underline"
-                          >
-                            <ExternalLink className="h-3 w-3 mr-1" />
-                            View Image
-                          </a>
-                        </div>
-                      )}
-                      
-                      {resource.resource_url && (
-                        <div>
-                          <p className="text-xs text-muted-foreground mb-1">Resource:</p>
-                          <a 
-                            href={resource.resource_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="flex items-center text-sm text-blue-600 hover:underline"
-                          >
-                            <ExternalLink className="h-3 w-3 mr-1" />
-                            View Resource
-                          </a>
-                        </div>
-                      )}
+                    <p className="text-sm line-clamp-2 mb-4">{resource.description}</p>
+                    <div className="flex gap-2 mt-4">
+                      <Button variant="outline" size="sm" onClick={() => handleEditResource(resource)}>
+                        <Edit className="h-4 w-4 mr-1" /> Edit
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => handleDeleteResource(resource.id)}>
+                        <Trash className="h-4 w-4 mr-1" /> Delete
+                      </Button>
                     </div>
+                    {resource.resource_url && (
+                      <div className="mt-2">
+                        <a 
+                          href={resource.resource_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="text-sm text-blue-600 hover:underline"
+                        >
+                          View Resource
+                        </a>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
