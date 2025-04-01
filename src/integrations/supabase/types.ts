@@ -138,6 +138,7 @@ export type Database = {
       }
       job_postings: {
         Row: {
+          application_url: string | null
           created_at: string | null
           description: string
           id: string
@@ -148,6 +149,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          application_url?: string | null
           created_at?: string | null
           description: string
           id?: string
@@ -158,6 +160,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          application_url?: string | null
           created_at?: string | null
           description?: string
           id?: string
@@ -177,11 +180,46 @@ export type Database = {
           },
         ]
       }
-      profiles: {
+      partners: {
         Row: {
           created_at: string | null
+          description: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          updated_at: string | null
+          website_url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          bio: string | null
+          created_at: string | null
+          cv_url: string | null
+          education: string | null
+          experience: string | null
           full_name: string | null
           id: string
+          interests: string[] | null
           job_preferences: Json | null
           phone: string | null
           photo: string | null
@@ -190,9 +228,14 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          bio?: string | null
           created_at?: string | null
+          cv_url?: string | null
+          education?: string | null
+          experience?: string | null
           full_name?: string | null
           id: string
+          interests?: string[] | null
           job_preferences?: Json | null
           phone?: string | null
           photo?: string | null
@@ -201,15 +244,62 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          bio?: string | null
           created_at?: string | null
+          cv_url?: string | null
+          education?: string | null
+          experience?: string | null
           full_name?: string | null
           id?: string
+          interests?: string[] | null
           job_preferences?: Json | null
           phone?: string | null
           photo?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           skills?: string[] | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      resources: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          resource_url: string | null
+          title: string
+          type: string | null
+          updated_at: string | null
+          views: number | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          resource_url?: string | null
+          title: string
+          type?: string | null
+          updated_at?: string | null
+          views?: number | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          resource_url?: string | null
+          title?: string
+          type?: string | null
+          updated_at?: string | null
+          views?: number | null
         }
         Relationships: []
       }

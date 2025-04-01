@@ -1,6 +1,5 @@
 
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +30,12 @@ const JobCard: React.FC<JobCardProps> = ({
   applicationUrl = "#",
 }) => {
   const [showDetails, setShowDetails] = useState(false);
+
+  const handleApply = () => {
+    if (applicationUrl) {
+      window.open(applicationUrl, '_blank');
+    }
+  };
 
   return (
     <Card className="h-full flex flex-col">
@@ -98,7 +103,7 @@ const JobCard: React.FC<JobCardProps> = ({
             <DialogFooter className="mt-4">
               <Button 
                 className="w-full flex items-center gap-2"
-                onClick={() => window.open(applicationUrl, '_blank')}
+                onClick={handleApply}
               >
                 Apply for Position
                 <ExternalLink className="h-4 w-4" />
